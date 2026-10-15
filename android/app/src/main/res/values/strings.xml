@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AeroDose</string>
+    <string name="title_activity_main">AeroDose</string>
+    <string name="package_name">com.aerodose.monitor</string>
+    <string name="custom_url_scheme">com.aerodose.monitor</string>
+</resources>

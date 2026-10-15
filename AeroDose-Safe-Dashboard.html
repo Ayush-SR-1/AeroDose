@@ -1,0 +1,1487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AeroDose | Smart Cylinder Telemetry &amp; Valve Control</title>
+<style>
+:root{color-scheme:dark;--bg:#040711;--glass:rgba(15,23,42,.72);--strong:#11192df5;--line:rgba(255,255,255,.1);--text:#f8fafc;--muted:#afbdce;--cyan:#38bdf8;--green:#10b981;--amber:#f59e0b;--red:#f43f5e;--violet:#a78bfa}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:18px 22px;background:radial-gradient(at 10% 8%,#38bdf824,transparent 42%),radial-gradient(at 90% 12%,#8b5cf626,transparent 42%),radial-gradient(at 50% 90%,#10b98117,transparent 48%),var(--bg);color:var(--text);font:14px/1.45 Inter,"Segoe UI",system-ui,sans-serif}
+button,input,select{font:inherit}button{color:inherit}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #7dd3fc;outline-offset:3px}button:disabled{opacity:.48;cursor:not-allowed;transform:none!important}
+.shell{max-width:1380px;margin:auto;display:grid;gap:15px}.glass,.navbar,.status,.banner,.demo,.drawer,.critical-alert{background:var(--glass);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 32px #0005;backdrop-filter:blur(16px)}
+.navbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px}.brand{display:flex;align-items:center;gap:12px}.orb{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#07111d;font-weight:900;font-size:20px}.brand h1{margin:0;font-size:19px}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.controls,.switch,.row,.actions,.legend,.range,.toast-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.switch{padding:4px;border:1px solid var(--line);border-radius:12px;background:#060b16}.btn,.pill,.seg,.icon-btn{border:1px solid var(--line);border-radius:10px;background:#0a1221;padding:8px 12px;font-weight:700;cursor:pointer;transition:transform .15s,border-color .15s}.btn:hover,.pill:hover,.seg:hover{transform:translateY(-1px);border-color:var(--cyan)}.seg[aria-pressed=true]{background:linear-gradient(135deg,#0c8b67,var(--green));color:#041910;border-color:transparent}.seg[data-edition=PRO][aria-pressed=true]{background:linear-gradient(135deg,#6d28d9,#8b5cf6);color:white}.input,.select{max-width:100%;background:#070d18;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:8px 10px}.mini{font-size:12px;color:var(--muted)}
+.status{padding:9px 13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px}.status strong{color:var(--text)}.dot{width:9px;height:9px;background:var(--green);border-radius:50%;box-shadow:0 0 10px currentColor}.dot.offline{background:var(--red)}.dot.esp{background:var(--cyan)}.dot.unknown{background:var(--amber)}.stale{color:#fecaca;font-weight:700}.safety-note{padding:9px 13px;border-left:3px solid var(--amber);background:#f59e0b14;border-radius:7px;color:#fde68a;font-size:12px}
+.critical-alert{display:none;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:#7f1d1df2;border:2px solid var(--red);border-radius:14px;padding:12px 16px;color:#fff;font-weight:700;box-shadow:0 0 24px #f43f5e99}
+.critical-alert.active{display:flex;animation:pulseFault 1.2s infinite alternate}
+.fault{display:none;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:#7f1d1d8c;border:1px solid var(--red);border-radius:14px;padding:12px 15px;color:#ffe4e6}.fault.active{display:flex;animation:pulseFault 1.2s infinite alternate}@keyframes pulseFault{to{box-shadow:0 0 22px #f43f5e73}}
+.demo{padding:12px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-color:#f59e0b66;background:linear-gradient(90deg,#f59e0b19,#38bdf80f)}.demo-title{font-weight:800;color:#fbbf24}.demo-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.pill{padding:6px 10px;font-size:12px}.warning{color:#fbbf24;border-color:#f59e0b80}.critical{color:#fda4af;border-color:#f43f5e8c}.caption{display:none;flex-basis:100%;color:var(--text);font-size:12px}.caption.active{display:block}
+.banner{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:15px 18px;background:linear-gradient(125deg,#10b98124,#0f172ae6);border-color:#10b98170}.banner.locked{background:linear-gradient(125deg,#f43f5e2e,#0f172ae6);border-color:#f43f5e8c}.banner.unknown{background:linear-gradient(125deg,#f59e0b2e,#0f172ae6);border-color:#f59e0b8c}.banner h2{font-size:16px;margin:0}.banner p{color:var(--muted);margin:3px 0 0;font-size:12px}.actions{justify-content:flex-end}.arm{background:linear-gradient(135deg,#10b981,#059669);color:#041b12;border:0}.danger{background:linear-gradient(135deg,#f43f5e,#be123c);color:white;border:0}.ghost{background:#ffffff0f}.hold{position:relative;overflow:hidden;padding-right:38px;touch-action:none;user-select:none}.hold svg{position:absolute;right:8px;top:50%;width:23px;height:23px;transform:translateY(-50%) rotate(-90deg);pointer-events:none}.hold circle{fill:none;stroke:#ffffff59;stroke-width:3}.hold .progress{stroke:white;stroke-dasharray:63;stroke-dashoffset:63;stroke-linecap:round}
+.workspace{display:grid;grid-template-columns:minmax(275px,350px) minmax(0,1fr);gap:15px}.glass{padding:17px 18px}.twin{display:flex;flex-direction:column;gap:10px}.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:11px}.card-head h2,.card-head h3{font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--cyan);margin:0}.twin svg{width:100%;height:auto;max-height:385px;background:#040711c7;border:1px solid var(--line);border-radius:14px}.subnote{text-align:center;color:var(--muted);background:#04071199;padding:9px;border-radius:10px;font-size:12px}
+.right{display:grid;gap:15px;align-content:start}.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}.kpi{padding:13px 14px;min-height:104px;background:var(--glass);border:1px solid var(--line);border-radius:15px}.kpi small{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.35px}.value{font-size:24px;font-weight:850;margin:5px 0 2px}.foot{font-size:12px;color:var(--muted)}.cyan{color:var(--cyan)}.green{color:#34d399}.amber{color:#fbbf24}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:15px}.hidden{display:none!important}.preset-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.preset{min-height:72px;text-align:center;background:#070d18;border:1px solid var(--line);border-radius:11px;padding:8px;cursor:pointer}.preset:hover{border-color:var(--green)}.preset strong,.preset span{display:block}.preset span{font-size:12px;color:var(--muted)}.control-row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:9px 0;border-bottom:1px solid #ffffff0f}.control-row:last-child{border-bottom:0}.control-row input[type=number]{width:105px;text-align:right}.meter{height:13px;border-radius:8px;background:linear-gradient(90deg,#10b981 0 78%,#f59e0b 78% 92%,#f43f5e 92%);position:relative;margin:10px 0 4px}.meter:after{content:"";position:absolute;top:-5px;bottom:-5px;left:92%;border-left:2px dashed white}.meter-fill{height:100%;border-radius:8px;background:#ffffffa6;width:0}
+.chart-box{background:#04071199;border:1px solid var(--line);border-radius:13px;padding:11px;position:relative}.chart-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.range button[aria-pressed=true]{border-color:var(--cyan);color:var(--cyan)}#chartSvg{display:block;width:100%;height:150px;touch-action:pan-y}.legend{font-size:12px;color:var(--muted);margin:4px 0}.legend span:before{content:"";display:inline-block;width:13px;border-top:2px solid var(--cyan);margin:0 5px 3px 0}.legend .gas:before{border-color:var(--green)}.legend .mark:before{border-color:var(--amber);border-top-style:dashed}.tooltip{display:none;position:absolute;z-index:2;top:8px;left:8px;max-width:90%;padding:7px 9px;background:#07101eee;border:1px solid #38bdf873;border-radius:8px;font-size:12px;pointer-events:none}.chart-summary{margin-top:6px;color:var(--muted);font-size:12px}
+.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#04071180;border:1px solid var(--line);border-radius:10px;padding:10px}.stat small{font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:15px;margin-top:4px}#weekSvg{width:100%;height:75px;display:block;margin-top:5px}.week-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.sim-tag{color:#fbbf24;font-size:12px}.drawer{padding:12px 15px;display:none;max-height:260px;overflow:auto}.drawer.open{display:block}.log-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}.log-time{white-space:nowrap;color:var(--muted)}.refill-history{font-size:12px;color:var(--muted);display:grid;gap:4px;margin-top:8px}
+.toast-stack{position:fixed;top:14px;right:14px;z-index:1000;display:grid;gap:8px;width:min(370px,calc(100vw - 28px));pointer-events:none}.toast{pointer-events:auto;background:var(--strong);border:1.5px solid var(--green);border-radius:14px;padding:11px 13px;box-shadow:0 18px 45px #0009;animation:toastIn .2s ease-out}.toast-head{display:flex;justify-content:space-between;gap:8px;font-weight:800;margin-bottom:4px}.toast-msg{font-size:13px}.toast-time{font-size:12px;color:var(--muted);margin-top:4px}.toast-actions{gap:7px}.toast-actions button{background:transparent;border:0;cursor:pointer;font-weight:800}.undo{color:#7dd3fc}.close-toast{color:var(--muted)}@keyframes toastIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+.backdrop{display:none;position:fixed;inset:0;z-index:1200;background:#000b;align-items:center;justify-content:center;padding:15px}.backdrop.open{display:flex}.modal{width:min(470px,100%);padding:19px;background:#101827;border:1px solid #38bdf866;border-radius:17px;box-shadow:0 24px 70px #000}.modal h2{font-size:18px;margin:0 0 6px}.modal p{color:var(--muted);font-size:13px;margin:0 0 12px}.check{display:flex;align-items:center;gap:9px;padding:7px 0}.progress-wrap{height:10px;border-radius:9px;background:#263143;overflow:hidden;margin:8px 0}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--green));transition:width .2s}.modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:13px}
+.badge-dot{display:inline-block;width:8px;height:8px;background:var(--red);border-radius:50%;margin-left:6px;box-shadow:0 0 8px var(--red);vertical-align:middle}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.modal-fault-box{background:#7f1d1d40;border:1px solid var(--red);border-radius:9px;padding:8px 10px;margin-bottom:12px;font-size:12px;color:#ffe4e6}
+@media(max-width:1050px){.workspace{grid-template-columns:1fr}.twin svg{max-height:330px}}@media(max-width:760px){body{padding:11px}.panels{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.navbar{padding:12px}.controls{width:100%}.control-row{align-items:flex-start;flex-wrap:wrap}.banner{padding:13px}.actions{width:100%}.actions .btn{flex:1}.insights{grid-template-columns:1fr 1fr}.insights .stat:last-child{grid-column:span 2}}@media(max-width:420px){.kpis{grid-template-columns:1fr 1fr}.value{font-size:21px}.seg{padding:7px 8px;font-size:12px}.preset-row{gap:5px}.preset{padding:7px 4px}.status{gap:8px}.insights{grid-template-columns:1fr}.insights .stat:last-child{grid-column:auto}.navbar{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="sr-only" id="globalAlertRegion" role="alert" aria-live="assertive" aria-atomic="true"></div>
+<div class="toast-stack" id="toastStack"></div>
+<main class="shell" id="pageMain">
+  <div class="critical-alert" id="deviceOpenLockedBanner" role="alert">
+    <span>🚨 CRITICAL: DEVICE REPORTS OPEN WHILE LOCKED — Retrying close command every 2s</span>
+    <button class="pill critical" id="forceRetryCloseButton">Force close now</button>
+  </div>
+  <header class="navbar">
+    <div class="brand"><div class="orb" aria-hidden="true">A</div><div><h1>AeroDose Telemetry</h1><p id="editionSub">Domestic LPG · Smart valve and refill alerts</p></div></div>
+    <div class="switch" role="group" aria-label="Edition">
+      <button class="seg" id="normalButton" data-edition="NORMAL" aria-pressed="true">🏠 Home<span class="badge-dot hidden" id="normalDot" aria-hidden="true"></span></button>
+      <button class="seg" id="proButton" data-edition="PRO" aria-pressed="false">🏭 Pro<span class="badge-dot hidden" id="proDot" aria-hidden="true"></span></button>
+    </div>
+    <span class="mini" id="profileViewLabel" style="font-weight:700;color:var(--cyan)">One valve · viewing Home cylinder</span>
+    <div class="controls">
+      <select class="select" id="dataSource" aria-label="Telemetry source"><option value="SIM">⚡ Simulator</option><option value="ESP">📡 ESP32</option></select>
+      <label class="mini">ESP IP / host <input class="input" id="espIp" aria-label="ESP IP address or hostname" value="192.168.4.1" size="14"></label>
+      <label class="mini">Tariff <input class="input" id="tariffInput" aria-label="Tariff in rupees per kilogram" type="number" min="0" max="10000" step=".5" value="63" style="width:88px"> ₹/kg</label>
+      <button class="icon-btn" id="muteButton" aria-pressed="false" aria-label="Mute notifications">🔊 Sound on</button>
+      <button class="btn" id="alertsButton">🔔 Alerts <span id="alertCount">1</span></button>
+    </div>
+  </header>
+  <div class="status">
+    <span class="dot" id="deviceDot" aria-hidden="true"></span><span>Device: <strong id="deviceState">Simulated</strong></span>
+    <span>Last sync: <strong id="lastSync">—</strong></span><span>Signal: <strong id="signalText">●●●</strong></span>
+    <span class="stale hidden" id="staleWarning">⚠ Stale data — live safety checks paused</span>
+    <span class="mini">HTTP ESP fetches are blocked when this page is served over HTTPS.</span>
+  </div>
+  <div class="safety-note">Simulated dashboard. The device firmware must enforce valve safety independently. This UI sends commands and displays device-reported state.</div>
+  <section class="fault" id="faultBanner" role="alert" aria-live="assertive">
+    <strong id="faultTitle">🚨 SAFETY FAULT</strong><span id="faultDetail"></span><span id="ackClock" aria-live="off"></span><span id="faultTime"></span>
+    <button class="pill warning" id="ackLeakButton" hidden>Cancel · false alarm</button>
+  </section>
+  <section class="demo">
+    <div class="demo-title">Live depletion &amp; safety demo</div>
+    <div class="demo-controls">
+      <label class="mini">Gas <input id="gasSlider" type="range" min="1" max="100" value="88" aria-label="Simulated gas level percent"></label>
+      <button class="pill" id="healthyButton">88% Healthy</button><button class="pill warning" id="stage1Button">19% Stage 1</button>
+      <button class="pill warning" id="stage2Button">9% Stage 2</button><button class="pill critical" id="emptyButton">1% Empty lock</button>
+      <button class="pill" id="runDemoButton">▶ Run full demo</button><button class="pill critical hidden" id="stopDemoButton">■ Stop</button>
+    </div><div class="caption" id="demoCaption"></div>
+  </section>
+  <section class="banner" id="commandBanner">
+    <div><h2 id="valveHeading" aria-live="polite">CYLINDER VALVE STATE: OPEN · ARMED</h2><p id="alertStatusSub" aria-live="polite">Cylinder status: healthy · System armed</p></div>
+    <div class="actions"><button class="btn ghost" id="tareButton">⚖️ Reset session</button>
+      <button class="btn arm hold" id="armButton" aria-label="Press and hold one second to arm and open valve">Hold to arm / open
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle class="progress" id="armProgress" cx="12" cy="12" r="10"></circle></svg>
+      </button><button class="btn danger" id="killButton">🛑 Close valve</button>
+    </div>
+  </section>
+  <section class="workspace">
+    <div class="glass twin">
+      <div class="card-head"><h2>🔍 Cylinder digital twin</h2><strong id="cylinderTag" class="green">14.2 kg LPG</strong></div>
+      <svg viewBox="0 0 280 390" role="img" aria-label="Cylinder gas level and valve state">
+        <defs><linearGradient id="bodyRedGradient" x1="0" x2="1"><stop stop-color="#991b1b"/><stop offset=".4" stop-color="#ef4444"/><stop offset="1" stop-color="#7f1d1d"/></linearGradient>
+          <linearGradient id="bodyProGradient" x1="0" x2="1"><stop stop-color="#1e293b"/><stop offset=".45" stop-color="#64748b"/><stop offset="1" stop-color="#0f172a"/></linearGradient>
+          <linearGradient id="liq" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#0369a1"/></linearGradient></defs>
+        <rect x="40" y="12" width="200" height="46" rx="9" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+        <text id="svgGasLabel" x="140" y="29" fill="#38bdf8" font-size="12" font-weight="bold" text-anchor="middle">HOME LPG CYLINDER</text>
+        <text id="svgValveText" x="140" y="47" fill="#34d399" font-size="12" text-anchor="middle">VALVE OPEN · ARMED</text>
+        <rect id="bodyRed" x="60" y="102" width="160" height="218" rx="30" fill="url(#bodyRedGradient)" stroke="#fca5a5"/>
+        <rect id="bodyPro" x="60" y="102" width="160" height="218" rx="30" fill="url(#bodyProGradient)" stroke="#94a3b8" style="display:none"/>
+        <rect x="82" y="124" width="116" height="172" rx="14" fill="#060a14" stroke="#fde047" stroke-width="2"/>
+        <rect id="liquidFill" x="84" y="145" width="112" height="149" rx="10" fill="url(#liq)"/>
+        <rect x="137" y="102" width="6" height="182" fill="#e2e8f0" opacity=".8"/>
+        <text id="svgPct" x="140" y="236" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">88.0% LEFT</text>
+        <text id="svgGasMass" x="140" y="256" fill="#e0f2fe" font-size="12" text-anchor="middle">12,496 g</text>
+        <rect x="36" y="328" width="208" height="46" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+        <text x="140" y="347" fill="#6ee7b7" font-size="12" font-weight="bold" text-anchor="middle">LOAD-CELL ESTIMATE</text>
+        <text id="svgSession" x="140" y="363" fill="#fff" font-size="12" text-anchor="middle">Session used: 1,704 g</text>
+      </svg>
+      <div class="subnote"><strong class="cyan">Sensor profile:</strong> <span id="sensorProfile">LPG PPM · Home</span></div>
+    </div>
+    <div class="right">
+      <div class="kpis">
+        <div class="kpi"><small id="gasKpiLabel">Remaining gas</small><div class="value"><span id="gasPct">88.0</span>%</div><div class="foot"><span id="remainingMass">12,496 g</span> / <span id="capacityMass">14,200 g</span></div></div>
+        <div class="kpi"><small>Flow rate</small><div class="value"><span id="flowValue">16.5</span><span style="font-size:13px"> g/min</span></div><div class="foot">Recent average: <span id="avgFlow">16.5</span> g/min</div></div>
+        <div class="kpi"><small>Session cost</small><div class="value amber" id="sessionCost">₹107.35</div><div class="foot">Tariff <span id="tariffValue">₹63.00</span> / kg</div></div>
+        <div class="kpi"><small id="gasSensorLabel">LPG sensor</small><div class="value" id="gasPpm">180 PPM</div><div class="foot">Motor current <strong id="motorCurrent">0.08 A</strong></div></div>
+      </div>
+      <div class="panels">
+        <section class="glass" id="homePanel">
+          <div class="card-head"><h3>🏠 Cooking presets</h3><span class="mini">Home edition</span></div>
+          <div class="preset-row">
+            <button class="preset" data-whistles="3" data-timer="0" data-label="Rice / Dal"><strong>🍚 3 Whistles</strong><span>Rice / Dal</span></button>
+            <button class="preset" data-whistles="5" data-timer="0" data-label="Pressure Cook"><strong>🍲 5 Whistles</strong><span>Pressure cook</span></button>
+            <button class="preset" data-whistles="0" data-timer="12" data-label="Milk Boil"><strong>🥛 Milk Boil</strong><span>12-second demo</span></button>
+          </div>
+          <div class="control-row"><span>Whistles <strong id="whistleReadout">0 / 3</strong></span><button class="pill" id="whistleButton">🔊 +1 Whistle</button></div>
+          <div class="control-row"><label for="simmerInput">Simmer timer (seconds)</label><input class="input" id="simmerInput" type="number" min="0" max="3600" value="0"></div>
+          <div class="control-row"><label for="angleSlider">Valve angle (0°–90°)</label><input id="angleSlider" type="range" min="0" max="90" value="75" aria-label="Valve angle degrees"></div>
+          <div class="control-row"><span>Fault tests</span><span class="row"><button class="pill critical" id="leakTest">Simulate leak</button><button class="pill warning" id="stallTest">Simulate stall</button></span></div>
+          <div class="control-row"><span>Refill actions</span><span class="row"><button class="pill warning hidden" id="bookRefillButton">📦 Book refill</button><button class="pill hidden" id="replaceCylinderButton">🔄 Cylinder replaced</button></span></div>
+          <div class="refill-history" id="refillHistory"></div>
+        </section>
+        <section class="glass hidden" id="proPanel">
+          <div class="card-head"><h3>🏭 Industrial mass-quota dosing</h3><span class="mini">CO₂ / N₂ profile</span></div>
+          <div class="control-row"><label for="quotaInput">Batch quota (grams)</label><input class="input" id="quotaInput" type="number" min="100" max="22000" value="3000"></div>
+          <div class="control-row"><span>Batch progress</span><strong id="quotaProgress">2,640 / 3,000 g</strong></div>
+          <div class="control-row"><span>Furnace temperature</span><strong id="furnaceReading">845 °C</strong></div>
+          <div class="meter" role="img" aria-label="920 degree Celsius furnace limit marked by dashed line"><div class="meter-fill" id="tempMeter"></div></div>
+          <div class="row mini" style="justify-content:space-between"><span>0 °C</span><span>920 °C limit</span><span>1,000 °C</span></div>
+          <div class="control-row"><span>Manifold pressure</span><strong id="pressureReading">2.40 bar</strong></div>
+          <div class="row" style="margin-top:10px"><button class="pill" id="doseButton">⚡ Dose up to 400 g</button><button class="pill" id="newBatchButton">New batch</button><button class="pill hidden" id="proReplaceCylinderButton">🔄 Cylinder replaced</button></div>
+          <div class="control-row"><span>Fault tests</span><span class="row"><button class="pill critical" id="proLeakTest">Simulate CO₂ leak</button><button class="pill warning" id="proStallTest">Simulate stall</button></span></div>
+        </section>
+        <section class="glass">
+          <div class="card-head"><h3>📈 Rolling telemetry</h3><div class="range" role="group" aria-label="Chart range">
+            <button class="pill" data-range="1" aria-pressed="false">1 min</button><button class="pill" data-range="10" aria-pressed="false">10 min</button><button class="pill" data-range="session" aria-pressed="true">24 h</button>
+          </div></div>
+          <div class="chart-box"><div class="chart-top"><span class="mini">Gas remaining + mass flow · hover for timestamp</span><span class="mini" id="chartFlowNow">16.5 g/min</span></div>
+            <div class="legend"><span>Flow (g/min)</span><span class="gas">Gas remaining (%)</span><span class="mark">Reset / refill / batch</span></div>
+            <svg id="chartSvg" viewBox="0 0 600 170" role="img" aria-label="Gas level and flow history"></svg><div class="tooltip" id="chartTooltip"></div>
+          </div>
+          <p class="chart-summary" id="chartSummary">Chart summary: —</p>
+        </section>
+        <section class="glass">
+          <div class="card-head"><h3>📊 Usage insights</h3><span class="sim-tag" id="insightTag">Simulated estimate</span></div>
+          <div class="insights"><div class="stat"><small>Today</small><strong id="todayUse">0 g</strong></div><div class="stat"><small>Yesterday</small><strong id="yesterdayUse">—</strong></div><div class="stat"><small>7-day average</small><strong id="dailyAverage">—</strong></div></div>
+          <svg id="weekSvg" viewBox="0 0 350 82" role="img" aria-label="Gas use by actual weekday"></svg><div class="week-labels" id="weekLabels"></div>
+          <p class="foot" id="daysLeftSummary">Time left: —</p>
+          <div class="row" style="margin-top:7px"><button class="pill" id="csvButton">📥 Export full CSV</button><button class="pill" id="alertsToggle">View alert log</button></div>
+        </section>
+      </div>
+    </div>
+  </section>
+  <section class="drawer" id="logDrawer"><div class="card-head"><h3>Alert history</h3><button class="pill" id="clearLogs">Clear log</button></div><div id="logList"></div></section>
+</main>
+<div class="backdrop" id="modalBackdrop">
+  <section class="modal" id="safetyModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle">Safety checks before re-arming</h2>
+    <p>Resolve the fault, verify the area, then keep the live gas reading below 300 PPM and motor current below 2.1 A for 10 continuous seconds. The valve remains closed until the hold-to-arm completes.</p>
+    <div class="modal-fault-box" id="modalFaultSummary">Active faults: None</div>
+    <label class="check"><input id="checkSource" type="checkbox"> Fault source checked</label>
+    <label class="check"><input id="checkVent" type="checkbox"> Area ventilated</label>
+    <label class="check"><input id="checkClear" type="checkbox"> Actuator / area is clear</label>
+    <div class="mini" id="rearmProgressText">Waiting for safe live gas and motor current readings…</div><div class="progress-wrap" aria-hidden="true"><div class="progress-fill" id="rearmProgress"></div></div>
+    <div class="modal-actions"><button class="pill" id="cancelModal">Close</button><button class="btn arm hold" id="confirmRearm" disabled aria-label="Press and hold one second to acknowledge checks and arm">Hold to acknowledge &amp; arm
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle class="progress" id="rearmHoldProgress" cx="12" cy="12" r="10"></circle></svg>
+    </button></div>
+  </section>
+</div>
+<script>
+(() => {
+  'use strict';
+  /* Cache every fixed DOM id once */
+  const el=Object.fromEntries([...document.querySelectorAll('[id]')].map(node=>[node.id,node]));
+  const $=id=>el[id],NS='http://www.w3.org/2000/svg',KEY='aerodose.dashboard.v3',CHANNEL='aerodose-safety-v3';
+  const money=new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2});
+  const fmtMoney=n=>money.format(Number.isFinite(n)?n:0),clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+  const round1=v=>Number.isFinite(v)?Math.round(v*10)/10:0,round2=v=>Number.isFinite(v)?Math.round(v*100)/100:0,roundInt=v=>Number.isFinite(v)?Math.round(v):0;
+  const dayKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const shiftedDay=offset=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+offset);return d;};
+  const profile=()=>state.profiles[state.edition],pct=p=>p.capacityGrams?clamp(100*p.currentGrams/p.capacityGrams,0,100):0;
+  
+  const DEFAULTS={
+    edition:'NORMAL',source:'SIM',espIp:'192.168.4.1',muted:false,
+    commandedOpen:true,reportedOpen:true,valveOpen:true,armed:true,angle:75,
+    whistleTarget:3,whistleCount:0,rearmRequired:false,checklist:{source:false,vent:false,clear:false},
+    rearmStableSince:null,leakAckDeadline:null,timerDeadline:null,lastSyncAt:0,lastDataAt:Date.now(),sensorFresh:false,
+    alertLogs:[],refillHistory:[],chartRange:'session',revision:0,faults:[],undo:null,
+    profiles:{
+      NORMAL:{capacityGrams:14200,currentGrams:12496,sessionStartGrams:14200,sessionUsedGrams:1704,flowGPerMin:16.5,
+        tariff:63,quotaGrams:3000,quotaUsed:0,quotaComplete:false,alertStage:0,
+        sensor:{gasPpm:180,motorCurrentA:.08,tempC:22,pressureBar:2.4,stallJamUntil:null},history:[],archive:[],dailyTotals:{}},
+      PRO:{capacityGrams:22000,currentGrams:19360,sessionStartGrams:22000,sessionUsedGrams:2640,flowGPerMin:42,
+        tariff:45,quotaGrams:3000,quotaUsed:2640,quotaComplete:false,alertStage:0,
+        sensor:{gasPpm:240,motorCurrentA:.12,tempC:845,pressureBar:2.4,stallJamUntil:null},history:[],archive:[],dailyTotals:{}}
+    }
+  };
+  const clone=value=>JSON.parse(JSON.stringify(value));
+  let state=clone(DEFAULTS),demoSnapshot=null,demoTimers=[],hold=null,rafHoldId=null,audioContext=null,lastSavedAt=0;
+  let sampleDueAt=Date.now(),lastSampleAt=Date.now(),pollInFlight=false,failedPolls=0,freshEspSample=false,chartPointerRatio=null;
+  let isLeader=false,leaderRelease=null,lastLeaderHeartbeat=Date.now(),lastLockedRetryAt=0,lastHiddenEvalAt=Date.now(),lastSimmerInputUpdate=0;
+  let espCommandInFlight=false;
+  const tabId='tab_'+Math.random().toString(36).slice(2,9);
+
+  const text=(id,value)=>{const node=$(id);if(node&&node.textContent!==String(value))node.textContent=String(value);};
+  const gasName=()=>state.edition==='NORMAL'?'LPG':'CO₂ / N₂';
+  const sensorName=()=>state.edition==='NORMAL'?'LPG PPM':'NDIR CO₂ PPM';
+  const stageFor=value=>value<=2?3:value<=10?2:value<=20?1:0;
+  const timeOf=ts=>new Date(ts).toLocaleTimeString();
+  const fixed=(value,digits=1)=>Number.isFinite(value)?value.toFixed(digits):'0.0';
+  let bus=null;
+  try{if('BroadcastChannel'in window)bus=new BroadcastChannel(CHANNEL);}catch(e){}
+
+  /* Strict validation */
+  function num(value,fallback,min,max){return typeof value==='number'&&Number.isFinite(value)&&value>=min&&value<=max?value:fallback;}
+  function validHost(value){
+    if(typeof value!=='string'||value.length>255)return false;
+    const m=value.trim().match(/^(.+?)(?::(\d{1,5}))?$/);if(!m||(m[2]&&(Number(m[2])<1||Number(m[2])>65535)))return false;
+    const ip=/^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/.test(m[1]);
+    const host=/^(?=.{1,253}$)(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)(?:\.(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?))*$/i.test(m[1]);
+    return ip||host;
+  }
+  function validPoint(x,capacity){
+    if(!x||typeof x!=='object'||!Number.isFinite(x.ts))return null;
+    if(x.gap===true)return{ts:x.ts,gap:true,simulated:x.simulated!==false,seeded:x.seeded===true};
+    if(typeof x.gasGrams!=='number'||!Number.isFinite(x.gasGrams)||x.gasGrams<0||x.gasGrams>capacity||
+       typeof x.flowGPerMin!=='number'||!Number.isFinite(x.flowGPerMin)||x.flowGPerMin<0||x.flowGPerMin>100000)return null;
+    const sensorFresh=x.sensorFresh!==false&&typeof x.gasPpm==='number'&&Number.isFinite(x.gasPpm);
+    return{ts:x.ts,gasGrams:round1(x.gasGrams),flowGPerMin:round1(x.flowGPerMin),
+      gasPpm:sensorFresh?roundInt(num(x.gasPpm,0,0,100000)):null,sensorFresh,motorCurrentA:round2(num(x.motorCurrentA,0,0,1000)),
+      tempC:round1(num(x.tempC,0,-100,3000)),pressureBar:round2(num(x.pressureBar,0,0,1000)),valveOpen:x.valveOpen===true,
+      stepMs:x.stepMs||1000,marker:typeof x.marker==='string'?x.marker.slice(0,60):'',simulated:x.simulated!==false,seeded:x.seeded===true,gap:false};
+  }
+  function validProfile(raw,base){
+    const p=clone(base);if(!raw||typeof raw!=='object')return p;
+    p.currentGrams=num(raw.currentGrams,p.currentGrams,0,p.capacityGrams);
+    p.sessionStartGrams=num(raw.sessionStartGrams,p.currentGrams,0,p.capacityGrams);
+    p.sessionUsedGrams=num(raw.sessionUsedGrams,Math.max(0,p.sessionStartGrams-p.currentGrams),0,p.capacityGrams);
+    p.flowGPerMin=num(raw.flowGPerMin,p.flowGPerMin,0,100000);p.tariff=num(raw.tariff,p.tariff,0,10000);
+    p.quotaGrams=num(raw.quotaGrams,p.quotaGrams,100,p.capacityGrams);
+    p.quotaUsed=num(raw.quotaUsed,0,0,p.capacityGrams);p.quotaComplete=raw.quotaComplete===true;
+    p.alertStage=[0,1,2,3].includes(raw.alertStage)?raw.alertStage:stageFor(pct(p));
+    if(raw.sensor&&typeof raw.sensor==='object'){
+      p.sensor.gasPpm=num(raw.sensor.gasPpm,p.sensor.gasPpm,0,100000);
+      p.sensor.motorCurrentA=num(raw.sensor.motorCurrentA,p.sensor.motorCurrentA,0,1000);
+      p.sensor.tempC=num(raw.sensor.tempC,p.sensor.tempC,-100,3000);
+      p.sensor.pressureBar=num(raw.sensor.pressureBar,p.sensor.pressureBar,0,1000);
+      p.sensor.stallJamUntil=Number.isFinite(raw.sensor.stallJamUntil)?raw.sensor.stallJamUntil:null;
+    }
+    p.history=Array.isArray(raw.history)?raw.history.map(x=>validPoint(x,p.capacityGrams)).filter(Boolean).slice(-600):[];
+    p.archive=Array.isArray(raw.archive)?raw.archive.map(x=>validPoint(x,p.capacityGrams)).filter(Boolean).slice(-1440):[];
+    p.dailyTotals={};
+    if(raw.dailyTotals&&typeof raw.dailyTotals==='object')Object.entries(raw.dailyTotals).slice(-45).forEach(([k,v])=>{
+      if(/^\d{4}-\d{2}-\d{2}$/.test(k)&&v&&typeof v==='object')
+        p.dailyTotals[k]={grams:num(v.grams,0,0,10000000),simulated:v.simulated!==false,seeded:v.seeded===true};
+    });
+    return p;
+  }
+  function validateState(raw){
+    if(!raw||typeof raw!=='object')return clone(DEFAULTS);
+    const s=clone(DEFAULTS);s.edition=['NORMAL','PRO'].includes(raw.edition)?raw.edition:'NORMAL';
+    s.source=['SIM','ESP'].includes(raw.source)?raw.source:'SIM';s.sensorFresh=s.source==='SIM';s.espIp=validHost(raw.espIp)?raw.espIp:DEFAULTS.espIp;
+    s.muted=raw.muted===true;
+    s.commandedOpen=raw.commandedOpen===true;
+    s.reportedOpen=raw.reportedOpen===true;
+    s.valveOpen=raw.valveOpen===true;
+    s.armed=raw.armed===true;
+    s.angle=num(raw.angle,75,0,90);s.whistleTarget=num(raw.whistleTarget,3,0,20);s.whistleCount=num(raw.whistleCount,0,0,100);
+    s.rearmRequired=raw.rearmRequired===true;s.rearmStableSince=null;
+    s.leakAckDeadline=num(raw.leakAckDeadline,null,0,Number.MAX_SAFE_INTEGER);
+    s.timerDeadline=num(raw.timerDeadline,null,0,Number.MAX_SAFE_INTEGER);
+    s.lastSyncAt=num(raw.lastSyncAt,0,0,Number.MAX_SAFE_INTEGER);s.lastDataAt=num(raw.lastDataAt,Date.now(),0,Number.MAX_SAFE_INTEGER);
+    s.chartRange=['session',1,10].includes(raw.chartRange)?raw.chartRange:'session';
+    s.revision=num(raw.revision,0,0,Number.MAX_SAFE_INTEGER);
+    s.profiles.NORMAL=validProfile(raw.profiles?.NORMAL,DEFAULTS.profiles.NORMAL);
+    s.profiles.PRO=validProfile(raw.profiles?.PRO,DEFAULTS.profiles.PRO);
+    s.faults=Array.isArray(raw.faults)?raw.faults.filter(f=>f&&['leak','stall','empty'].includes(f.type)&&Number.isFinite(f.at))
+      .map(f=>({type:f.type,profile:f.profile==='PRO'?'PRO':'NORMAL',reading:String(f.reading||'Reading unavailable').slice(0,100),at:f.at})):[];
+    s.checklist=raw.checklist&&typeof raw.checklist==='object'?{source:raw.checklist.source===true,vent:raw.checklist.vent===true,clear:raw.checklist.clear===true}:{source:false,vent:false,clear:false};
+    s.undo=raw.undo&&Number.isFinite(raw.undo.deadline)?{deadline:num(raw.undo.deadline,null,0,Number.MAX_SAFE_INTEGER),valveOpen:raw.undo.valveOpen===true,commandedOpen:raw.undo.commandedOpen===true,armed:raw.undo.armed===true,angle:num(raw.undo.angle,0,0,90)}:null;
+    s.alertLogs=Array.isArray(raw.alertLogs)?raw.alertLogs.filter(x=>x&&Number.isFinite(x.ts)&&typeof x.msg==='string').map(x=>({ts:x.ts,channel:String(x.channel||'SYSTEM').slice(0,60),msg:x.msg.slice(0,500)})).slice(0,3000):[];
+    s.refillHistory=Array.isArray(raw.refillHistory)?raw.refillHistory.filter(x=>x&&Number.isFinite(x.ts)).map(x=>({ts:x.ts,edition:x.edition==='PRO'?'PRO':'NORMAL',status:String(x.status||'Booked').slice(0,80)})).slice(0,500):[];
+    return s;
+  }
+  function seedDaily(p){
+    const values=[360,420,390,480,410,445];
+    for(let i=6;i>=1;i--){const date=shiftedDay(-i),key=dayKey(date);if(!p.dailyTotals[key])p.dailyTotals[key]={grams:values[6-i],simulated:true,seeded:true};}
+    const key=dayKey(new Date());if(!p.dailyTotals[key])p.dailyTotals[key]={grams:0,simulated:true,seeded:false};
+  }
+  function hydrate(){
+    try{const raw=localStorage.getItem(KEY);if(raw)state=validateState(JSON.parse(raw));}
+    catch(error){console.warn('Saved AeroDose state failed validation; defaults loaded.',error);state=clone(DEFAULTS);}
+    seedDaily(state.profiles.NORMAL);seedDaily(state.profiles.PRO);
+    state.faults=state.faults.filter(f=>f.type!=='empty'||pct(state.profiles[f.profile])<=2);
+    if(hasBlockingFault(state)){state.valveOpen=false;state.commandedOpen=false;state.armed=false;}
+    if(state.faults.some(f=>['leak','stall'].includes(f.type)))state.rearmRequired=true;
+  }
+
+  /* Leader Election */
+  function initLeaderElection(){
+    if('locks' in navigator && navigator.locks && typeof navigator.locks.request==='function'){
+      navigator.locks.request('aerodose_tab_leader',{mode:'exclusive'},()=>{
+        isLeader=true;
+        renderDevice();
+        logMessage('SYSTEM','This tab became leader (WebLock).');
+        return new Promise(resolve=>{leaderRelease=resolve;});
+      }).catch(err=>{
+        console.warn('Web Locks failed, falling back to BroadcastChannel heartbeat',err);
+        initHeartbeatFallback();
+      });
+    }else{
+      initHeartbeatFallback();
+    }
+  }
+  function initHeartbeatFallback(){
+    setInterval(()=>{
+      const now=Date.now();
+      if(!isLeader){
+        if(now-lastLeaderHeartbeat>3000){
+          isLeader=true;renderDevice();logMessage('SYSTEM','This tab became leader (heartbeat timeout).');
+        }
+      }else{
+        if(bus)try{bus.postMessage({type:'heartbeat',tabId,ts:now});}catch(e){}
+      }
+    },1000);
+  }
+
+  /* Persistence and remote merging */
+  function trimForQuota(){
+    Object.values(state.profiles).forEach(p=>{p.history=p.history.slice(-300);p.archive=p.archive.slice(-1200);});
+    state.alertLogs=state.alertLogs.slice(0,1500);
+  }
+  function saveState(force=false){
+    if(demoSnapshot)return false;
+    const now=Date.now();if(!force&&now-lastSavedAt<10000)return false;
+    state.revision=Math.max(now,state.revision+1);
+    try{
+      localStorage.setItem(KEY,JSON.stringify(state));lastSavedAt=now;announceState();return true;
+    }catch(error){
+      if(error?.name==='QuotaExceededError'||error?.name==='NS_ERROR_DOM_QUOTA_REACHED'){
+        trimForQuota();try{localStorage.setItem(KEY,JSON.stringify(state));lastSavedAt=now;announceState();return true;}
+        catch(retry){console.warn('AeroDose localStorage full after trimming.',retry);}
+      }else console.warn('AeroDose could not save settings.',error);
+      return false;
+    }
+  }
+  function announceState(){if(bus&&!demoSnapshot)try{bus.postMessage({type:'state',state:clone(state),fromLeader:isLeader,fromTab:tabId});}catch(e){}}
+  
+  function mergeRemote(raw,fromLeader=false){
+    const incoming=validateState(raw);
+    if(demoSnapshot){
+      const addFaults=target=>incoming.faults.forEach(f=>{if(!target.faults.some(x=>x.type===f.type&&x.profile===f.profile))target.faults.push(f);});
+      addFaults(state);addFaults(demoSnapshot);
+      const pending=incoming.rearmRequired||incoming.faults.some(f=>['leak','stall'].includes(f.type));
+      if(pending){state.rearmRequired=true;demoSnapshot.rearmRequired=true;state.valveOpen=false;state.commandedOpen=false;state.armed=false;demoSnapshot.valveOpen=false;demoSnapshot.commandedOpen=false;demoSnapshot.armed=false;}
+      if(hasBlockingFault(state)){state.valveOpen=false;state.commandedOpen=false;state.armed=false;cancelUndo();}
+      renderAll();return;
+    }
+    
+    // Closed always wins: remote tab must NEVER reopen a valve that this tab closed!
+    const closedWonValve=state.valveOpen&&incoming.valveOpen;
+    const closedWonArmed=state.armed&&incoming.armed;
+    const closedWonCommanded=state.commandedOpen&&incoming.commandedOpen;
+    
+    // Merge faults authoritative union
+    const merged=[...state.faults];
+    incoming.faults.forEach(f=>{if(!merged.some(x=>x.type===f.type&&x.profile===f.profile))merged.push(f);});
+    const newFault=merged.length>state.faults.length;
+    const pending=state.rearmRequired||incoming.rearmRequired||merged.some(f=>['leak','stall'].includes(f.type));
+    
+    const localEdition=state.edition; // Edition must not be overwritten by follower's state
+    if(isLeader){
+      // Leader preserves its authoritative gas levels and profiles, accepts remote manual close & faults
+      state.faults=merged;
+      state.rearmRequired=pending;
+      state.valveOpen=closedWonValve;
+      state.armed=closedWonArmed;
+      state.commandedOpen=closedWonCommanded;
+      if(newFault||hasBlockingFault(state)||pending){
+        state.valveOpen=false;state.commandedOpen=false;state.armed=false;cancelUndo();
+      }
+    }else{
+      // Follower tab accepts leader's telemetry & history, but preserves local edition and ensures closed always wins
+      state=incoming;
+      state.edition=localEdition;
+      state.faults=merged;
+      state.rearmRequired=pending;
+      state.valveOpen=closedWonValve;
+      state.armed=closedWonArmed;
+      state.commandedOpen=closedWonCommanded;
+      if(newFault||hasBlockingFault(state)||pending){
+        state.valveOpen=false;state.commandedOpen=false;state.armed=false;cancelUndo();
+      }
+    }
+    state.faults=state.faults.filter(f=>f.type!=='empty'||pct(state.profiles[f.profile])<=2);
+    if(state.valveOpen){const gate=canOpenValve();if(!gate.allowed||!state.armed){state.valveOpen=false;state.commandedOpen=false;state.armed=false;cancelUndo();}}
+    lastSavedAt=Date.now();renderAll();renderChart();
+  }
+
+  /* Safety gates */
+  function hasBlockingFault(s=state){
+    return s.faults.some(f=>f.type==='leak'||f.type==='stall'||(f.type==='empty'&&f.profile===s.edition));
+  }
+  function hasFreshEspData(){
+    return freshEspSample&&state.sensorFresh&&failedPolls===0&&Date.now()-state.lastSyncAt<=2500;
+  }
+  function canOpenValve(){
+    const p=profile();
+    if(pct(p)<=2)return{allowed:false,reason:'Cylinder is empty. Replace it above 2% before arming.'};
+    const blocks=state.faults.filter(f=>['leak','stall'].includes(f.type)||(f.type==='empty'&&f.profile===state.edition));
+    if(blocks.length)return{allowed:false,reason:`Resolve active ${blocks.map(f=>f.type).join(', ')} fault${blocks.length>1?'s':''} first.`};
+    if(state.rearmRequired)return{allowed:false,reason:'Complete checklist and continuous 10s safe reading dwell.'};
+    if(state.edition==='PRO'&&p.quotaComplete)return{allowed:false,reason:'Start a new batch before re-arming after quota completion.'};
+    if(state.source==='ESP'&&(!hasFreshEspData()||failedPolls>=3))return{allowed:false,reason:'ESP data is stale or offline; wait for fresh live telemetry.'};
+    return{allowed:true,reason:'Safety checks clear.'};
+  }
+
+  /* ESP Command Channel */
+  async function sendCommand(action){
+    if(state.source!=='ESP')return{ok:true,simulated:true};
+    const host=$('espIp').value.trim();
+    if(!validHost(host)){
+      showToast('INVALID ESP HOST','Cannot send command to invalid ESP host.','warning');
+      return{ok:false,error:'invalid_host'};
+    }
+    const payload=typeof action==='string'?{cmd:action,angle:state.angle}:{cmd:action.cmd||'close',angle:Number.isFinite(action.angle)?action.angle:state.angle};
+    espCommandInFlight=true;renderValve();
+    let timer;
+    try{
+      const controller=new AbortController();
+      timer=setTimeout(()=>controller.abort(),2500);
+      const res=await fetch(`http://${host}/api/command`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload),signal:controller.signal
+      });
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      const data=await res.json();
+      espCommandInFlight=false;
+      logMessage('COMMAND',`Sent cmd:${payload.cmd} angle:${payload.angle} · Ack received.`);
+      renderValve();
+      return{ok:true,data};
+    }catch(err){
+      espCommandInFlight=false;
+      renderValve();
+      showToast('ESP COMMAND FAILED',`Command "${payload.cmd}" failed: ${err.message}`,'warning');
+      return{ok:false,error:err.message};
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  /* Tri-state UI Valve representation */
+  function getValveUiState(){
+    if(state.source==='ESP'){
+      const offline=failedPolls>=3;
+      const stale=!hasFreshEspData();
+      if(offline||stale||espCommandInFlight||state.reportedOpen===null)return'UNKNOWN';
+      return state.reportedOpen?'OPEN':'CLOSED';
+    }
+    return (state.commandedOpen&&state.valveOpen)?'OPEN':'CLOSED';
+  }
+
+  /* Valve control actions */
+  function openValve(cause){
+    const gate=canOpenValve();
+    if(!gate.allowed){
+      showToast('SAFETY LOCK',gate.reason,'danger');
+      if(state.rearmRequired)openSafetyModal();
+      return false;
+    }
+    state.armed=true;state.commandedOpen=true;state.valveOpen=true;
+    if(state.source==='ESP')void sendCommand({cmd:'open',angle:state.angle});
+    logMessage('VALVE',`Valve opened via ${cause}.`);
+    renderValve();saveState(true);
+    if(bus)try{bus.postMessage({type:'valve_command',cmd:'open',reason:cause,fromTab:tabId});}catch(e){}
+    return true;
+  }
+
+  function closeValve(reason,undoable=false){
+    if(undoable)state.undo={deadline:Date.now()+5000,valveOpen:state.valveOpen,commandedOpen:state.commandedOpen,armed:state.armed,angle:state.angle};
+    state.commandedOpen=false;state.valveOpen=false;
+    if(reason==='kill')state.armed=false;
+    if(state.source==='ESP')void sendCommand({cmd:'close',angle:0});
+    renderValve();logMessage('VALVE',`Valve closed · ${reason}.`);
+    if(undoable)showToast('REMOTE CLOSE','Valve closed. Undo is available for 5 seconds.','danger',{undo:true});
+    saveState(true);
+    if(bus)try{bus.postMessage({type:'valve_command',cmd:'close',reason,fromTab:tabId});}catch(e){}
+  }
+  function cancelUndo(){if(state.undo){state.undo=null;document.querySelectorAll('.undo-button').forEach(b=>b.disabled=true);}}
+
+  /* Pure safety evaluation */
+  function evaluateSafety(s){
+    const p=s.profiles[s.edition],percent=pct(p),sensorValid=s.source!=='ESP'||s.sensorFresh===true;
+    const types=new Set(s.faults.filter(f=>f.profile===s.edition).map(f=>f.type)),actions=[];
+    if(sensorValid&&p.sensor.gasPpm>=1000&&!types.has('leak')){
+      actions.push({type:'raiseFault',fault:{type:'leak',profile:s.edition,reading:`${p.sensor.gasPpm.toFixed(0)} PPM`,at:s.lastDataAt}});
+      types.add('leak');
+    }
+    if(sensorValid&&p.sensor.motorCurrentA>2.1&&!types.has('stall')){
+      actions.push({type:'raiseFault',fault:{type:'stall',profile:s.edition,reading:`${p.sensor.motorCurrentA.toFixed(2)} A`,at:s.lastDataAt}});
+      types.add('stall');
+    }
+    const empty=types.has('empty')&&s.faults.some(f=>f.type==='empty'&&f.profile===s.edition);
+    if(percent<=2&&!empty){
+      actions.push({type:'raiseFault',fault:{type:'empty',profile:s.edition,reading:`${percent.toFixed(1)}% gas remaining`,at:s.lastDataAt}});
+      types.add('empty');
+    }else if(percent>2&&empty){
+      actions.push({type:'clearFault',faultType:'empty',profile:s.edition});
+    }
+    if(hasBlockingFault(s)||[...types].some(type=>['leak','stall','empty'].includes(type))){
+      actions.push({type:'closeValve',reason:'Safety interlock active'});
+    }
+    const next=stageFor(percent);
+    if(next!==p.alertStage){
+      actions.push({type:'changeAlertStage',stage:next});
+      actions.push({type:'stageNotification',stage:next,pct:percent,grams:p.currentGrams});
+    }
+    return actions;
+  }
+
+  function recentAverageFlow(p=profile()){
+    const points=[...p.archive,...p.history].filter(x=>!x.gap&&x.ts>Date.now()-600000&&x.flowGPerMin>0);
+    return points.length?points.reduce((sum,x)=>sum+x.flowGPerMin,0)/points.length:(state.edition==='NORMAL'?16.5:42);
+  }
+  function duration(minutes){
+    if(!Number.isFinite(minutes))return'—';
+    if(minutes<60)return`${Math.max(1,Math.round(minutes))} min`;
+    if(minutes<2880)return`${(minutes/60).toFixed(1)} hr`;
+    return`${(minutes/1440).toFixed(1)} days`;
+  }
+  const faultRank={leak:3,stall:2,empty:1};
+  function visibleFaults(){return state.faults.filter(f=>f.type!=='empty'||f.profile===state.edition);}
+  function highestFault(){return [...visibleFaults()].sort((a,b)=>faultRank[b.type]-faultRank[a.type])[0]||null;}
+
+  /* Recorded history with rounded values */
+  function pointFor(p,opts={}){
+    const sensorFresh=opts.sensorFresh===undefined?(state.source!=='ESP'||state.sensorFresh):opts.sensorFresh;
+    const gasVal=opts.gasGrams===undefined?p.currentGrams:opts.gasGrams;
+    const flowVal=opts.flow===undefined?(state.valveOpen?p.flowGPerMin||0:0):opts.flow;
+    return{ts:Date.now(),gasGrams:round1(gasVal),flowGPerMin:round1(flowVal),
+      gasPpm:sensorFresh&&p.sensor.gasPpm!==null?roundInt(p.sensor.gasPpm):null,
+      sensorFresh,motorCurrentA:round2(p.sensor.motorCurrentA),tempC:round1(p.sensor.tempC),
+      pressureBar:round2(p.sensor.pressureBar),valveOpen:state.valveOpen,
+      stepMs:1000,marker:opts.marker||'',simulated:opts.simulated!==false,seeded:opts.seeded===true,gap:false};
+  }
+  function averageBucket(points){
+    const valid=points.filter(x=>!x.gap),avg=key=>{const a=valid.map(x=>x[key]).filter(Number.isFinite);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;};
+    const sensorFresh=valid.some(x=>x.sensorFresh!==false&&Number.isFinite(x.gasPpm));
+    const markers=points.map(x=>x.marker||'').filter(Boolean).join('|');
+    const bucket={ts:points[0].ts,gasGrams:round1(avg('gasGrams')),flowGPerMin:round1(avg('flowGPerMin')),
+      gasPpm:sensorFresh?roundInt(avg('gasPpm')):null,sensorFresh,motorCurrentA:round2(avg('motorCurrentA')),
+      tempC:round1(avg('tempC')),pressureBar:round2(avg('pressureBar')),valveOpen:valid.some(x=>x.valveOpen),
+      stepMs:60000,simulated:points.every(x=>x.simulated)};
+    if(markers)bucket.marker=markers;
+    if(points.every(x=>x.seeded))bucket.seeded=true;
+    if(valid.length===0)bucket.gap=true;
+    return bucket;
+  }
+  function appendHistory(opts={}){
+    const p=profile();p.history.push(pointFor(p,opts));
+    while(p.history.length>600)p.archive.push(averageBucket(p.history.splice(0,60)));
+    const cutoff=Date.now()-86400000;p.archive=p.archive.filter(x=>x.ts>=cutoff).slice(-1440);
+    renderChart();
+  }
+  function addGap(){
+    const p=profile();p.history.push({ts:Date.now(),gap:true,gasGrams:null,flowGPerMin:null,simulated:false,seeded:false});
+    while(p.history.length>600)p.archive.push(averageBucket(p.history.splice(0,60)));
+    p.archive=p.archive.filter(x=>x.ts>=Date.now()-86400000).slice(-1440);
+    renderChart();
+  }
+
+  /* Session Chart - Timestamp scaled across visible range with 5s break */
+  function chartPoints(){
+    const p=profile(),all=[...p.archive,...p.history].sort((a,b)=>a.ts-b.ts);
+    const rangeMs=state.chartRange===1||state.chartRange==='1'?60000:(state.chartRange===10||state.chartRange==='10'?600000:86400000);
+    const cutoff=Date.now()-rangeMs;
+    return all.filter(x=>x.ts>=cutoff);
+  }
+  const chart={ready:false,flow:null,gas:null,markers:null,overlay:null};
+  function initChart(){
+    const svg=$('chartSvg');chart.flow=document.createElementNS(NS,'path');chart.gas=document.createElementNS(NS,'path');
+    chart.flow.setAttribute('fill','none');chart.flow.setAttribute('stroke','#38bdf8');chart.flow.setAttribute('stroke-width','2.5');
+    chart.gas.setAttribute('fill','none');chart.gas.setAttribute('stroke','#10b981');chart.gas.setAttribute('stroke-width','2.3');
+    chart.markers=document.createElementNS(NS,'g');
+    for(let i=0;i<3;i++){const line=document.createElementNS(NS,'line');line.setAttribute('x1','25');line.setAttribute('x2','575');line.setAttribute('y1',String(15+i*70));line.setAttribute('y2',String(15+i*70));line.setAttribute('stroke','#94a3b833');line.setAttribute('stroke-dasharray','3 5');svg.append(line);}
+    svg.append(chart.flow,chart.gas,chart.markers);
+    chart.overlay=document.createElementNS(NS,'rect');chart.overlay.setAttribute('x','25');chart.overlay.setAttribute('y','12');chart.overlay.setAttribute('width','550');chart.overlay.setAttribute('height','140');chart.overlay.setAttribute('fill','transparent');chart.overlay.style.cursor='crosshair';svg.append(chart.overlay);
+    chart.overlay.addEventListener('pointermove',event=>{const rect=svg.getBoundingClientRect();chartPointerRatio=clamp((event.clientX-rect.left)/rect.width,0,1);updateTooltip();});
+    chart.overlay.addEventListener('pointerleave',()=>{$('chartTooltip').style.display='none';chartPointerRatio=null;});chart.ready=true;
+  }
+  function renderChart(){
+    if(!chart.ready)return;
+    const points=chartPoints(),flows=points.filter(x=>!x.gap).map(x=>x.flowGPerMin||0),gas=points.filter(x=>!x.gap).map(x=>x.gasGrams||0);
+    const maxFlow=Math.max(state.edition==='NORMAL'?25:60,...flows,1),p=profile(),bottom=155,plotH=140;
+    const rangeMs=state.chartRange===1||state.chartRange==='1'?60000:(state.chartRange===10||state.chartRange==='10'?600000:86400000);
+    const now=Date.now(),tMin=now-rangeMs,tMax=now;
+
+    function makePath(key,scale){
+      let d='',pen=false,lastTs=null,lastStep=1000;
+      for(let i=0;i<points.length;i++){
+        const x=points[i];
+        if(x.gap||!Number.isFinite(x[key])){pen=false;lastTs=null;continue;}
+        const threshold=(state.chartRange==='session'&&(x.stepMs>1000||lastStep>1000))?75000:5000;
+        if(lastTs!==null&&(x.ts-lastTs>threshold))pen=false; // Break line when gap exceeds 5 seconds
+        lastTs=x.ts;lastStep=x.stepMs||1000;
+        const normX=clamp((x.ts-tMin)/(tMax-tMin),0,1);
+        const px=25+normX*550;
+        const py=bottom-clamp(scale(x[key]),0,1)*plotH;
+        d+=`${pen?'L':'M'}${px.toFixed(1)} ${py.toFixed(1)} `;
+        pen=true;
+      }
+      return d.trim();
+    }
+    chart.flow.setAttribute('d',makePath('flowGPerMin',v=>v/maxFlow));
+    chart.gas.setAttribute('d',makePath('gasGrams',v=>v/p.capacityGrams));
+    chart.markers.replaceChildren();
+    points.forEach(point=>{
+      if(!point.marker)return;
+      const normX=clamp((point.ts-tMin)/(tMax-tMin),0,1);
+      const x=25+normX*550;
+      const line=document.createElementNS(NS,'line');line.setAttribute('x1',x.toFixed(1));line.setAttribute('x2',x.toFixed(1));line.setAttribute('y1','15');line.setAttribute('y2','155');
+      line.setAttribute('stroke','#f59e0b');line.setAttribute('stroke-dasharray','5 4');
+      const title=document.createElementNS(NS,'title');title.textContent=`${point.marker} · ${new Date(point.ts).toLocaleTimeString()}`;line.append(title);chart.markers.append(line);
+    });
+    const pctNow=pct(p),minG=gas.length?Math.min(...gas):p.currentGrams,maxG=gas.length?Math.max(...gas):p.currentGrams,minF=flows.length?Math.min(...flows):0,maxF=flows.length?Math.max(...flows):0;
+    text('chartSummary',`Chart summary: gas ${pctNow.toFixed(1)}%; flow ${fixed(p.flowGPerMin)} g/min; range gas ${(minG/p.capacityGrams*100).toFixed(1)}–${(maxG/p.capacityGrams*100).toFixed(1)}%; flow ${minF.toFixed(1)}–${maxF.toFixed(1)} g/min.`);
+    text('chartFlowNow',`${fixed(p.flowGPerMin)} g/min`);updateTooltip();
+  }
+  function updateTooltip(){
+    if(chartPointerRatio===null)return;
+    const points=chartPoints().filter(x=>!x.gap&&Number.isFinite(x.gasGrams));if(!points.length)return;
+    const rangeMs=state.chartRange===1||state.chartRange==='1'?60000:(state.chartRange===10||state.chartRange==='10'?600000:86400000);
+    const now=Date.now(),tMin=now-rangeMs,tMax=now;
+    const targetTs=tMin+chartPointerRatio*(tMax-tMin);
+    let closest=points[0],minDiff=Math.abs(points[0].ts-targetTs);
+    for(let i=1;i<points.length;i++){
+      const diff=Math.abs(points[i].ts-targetTs);
+      if(diff<minDiff){minDiff=diff;closest=points[i];}
+    }
+    const tip=$('chartTooltip');
+    tip.textContent=`${new Date(closest.ts).toLocaleTimeString()} · ${(closest.gasGrams/profile().capacityGrams*100).toFixed(1)}% gas · ${fixed(closest.flowGPerMin)} g/min${closest.marker?` · ${closest.marker}`:''}`;
+    tip.style.display='block';tip.style.left=`${clamp(chartPointerRatio*100,0,70)}%`;
+  }
+
+  /* Usage totals & Insights with real vs seeded days check */
+  function ensureToday(p){
+    const key=dayKey(new Date());if(!p.dailyTotals[key])p.dailyTotals[key]={grams:0,simulated:true,seeded:false};return p.dailyTotals[key];
+  }
+  function addUsage(grams,simulated){
+    if(!(grams>0))return;const day=ensureToday(profile());if(day.seeded){day.grams=0;day.seeded=false;}
+    day.grams+=grams;day.simulated=simulated;
+  }
+  function sevenDays(p){
+    return Array.from({length:7},(_,i)=>{const d=shiftedDay(i-6),key=dayKey(d);return{key,label:new Intl.DateTimeFormat(undefined,{weekday:'short'}).format(d),...(p.dailyTotals[key]||{grams:0,simulated:true,seeded:false})};});
+  }
+  function renderInsights(){
+    const p=profile(),days=sevenDays(p);
+    const realDays=days.filter(d=>!d.seeded);
+    text('todayUse',`${Math.round(days[6].grams).toLocaleString()} g`);
+    text('yesterdayUse',days[5].seeded?'—':`${Math.round(days[5].grams).toLocaleString()} g`);
+    
+    let atDaily='estimate';
+    if(realDays.length>=3){
+      const realAvg=realDays.reduce((sum,x)=>sum+x.grams,0)/realDays.length;
+      text('dailyAverage',`${Math.round(realAvg).toLocaleString()} g/day`);
+      atDaily=realAvg>0?`${(p.currentGrams/realAvg).toFixed(1)} days`:'—';
+      text('insightTag',days[6].simulated?'Simulated consumption':'Live ESP daily totals');
+    }else{
+      text('dailyAverage','estimate');
+      atDaily='estimate';
+      text('insightTag','Estimate (needs ≥ 3 real days)');
+    }
+    const max=Math.max(1,...days.map(x=>x.grams)),svg=$('weekSvg');svg.replaceChildren();
+    days.forEach((day,i)=>{
+      const bar=document.createElementNS(NS,'rect'),h=Math.max(3,day.grams/max*55);
+      bar.setAttribute('x',String(13+i*47));bar.setAttribute('y',String(67-h));bar.setAttribute('width','25');bar.setAttribute('height',String(h));bar.setAttribute('rx','4');
+      bar.setAttribute('fill',day.seeded?'#475569':day.simulated?'#8b5cf6':'#10b981');
+      const title=document.createElementNS(NS,'title');title.textContent=`${day.label}: ${Math.round(day.grams)} g${day.seeded?' (seeded)':day.simulated?' (simulated)':''}`;bar.append(title);svg.append(bar);
+    });
+    const labels=$('weekLabels');labels.replaceChildren();days.forEach(day=>{const label=document.createElement('span');label.textContent=day.label;labels.append(label);});
+    const avgFlow=recentAverageFlow(p),atFlow=duration(p.currentGrams/avgFlow);
+    text('daysLeftSummary',`Time left at current burn: ${atFlow} · Days at 7-day average: ${atDaily}`);
+  }
+
+  /* Audio, Alerts, Screen-Reader Live Region outside inert modal */
+  function renderLogs(){
+    const list=$('logList');list.replaceChildren();text('alertCount',state.alertLogs.length);
+    state.alertLogs.forEach(log=>{const row=document.createElement('div'),message=document.createElement('span'),time=document.createElement('span');
+      row.className='log-row';message.textContent=`[${log.channel}] ${log.msg}`;time.className='log-time';time.textContent=new Date(log.ts).toLocaleString();row.append(message,time);list.append(row);});
+  }
+  function playSound(severity){
+    if(state.muted)return;
+    try{if(!audioContext)audioContext=new(window.AudioContext||window.webkitAudioContext)();if(audioContext.state==='suspended')void audioContext.resume();
+      const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.frequency.value=severity==='danger'?500:880;gain.gain.value=.035;
+      osc.connect(gain);gain.connect(audioContext.destination);osc.start();osc.stop(audioContext.currentTime+.12);
+    }catch(e){}
+  }
+  function announceLive(msg){
+    const region=$('globalAlertRegion');
+    if(region){
+      region.textContent='';
+      setTimeout(()=>{region.textContent=String(msg);},25);
+    }
+  }
+  function showToast(title,message,severity='info',options={}){
+    if(severity==='danger'||severity==='warning'){
+      announceLive(`${title}: ${message}`);
+    }
+    const toast=document.createElement('section');toast.className='toast';toast.setAttribute('role',severity==='danger'?'alert':'status');
+    toast.style.borderColor=severity==='danger'?'var(--red)':severity==='warning'?'var(--amber)':severity==='success'?'var(--green)':'var(--cyan)';
+    const head=document.createElement('div');head.className='toast-head';const label=document.createElement('span');
+    label.textContent=`${severity==='danger'?'🚨':severity==='warning'?'⚠️':severity==='success'?'✓':'ℹ'} ${title}`;
+    const actions=document.createElement('span');actions.className='toast-actions';
+    if(options.undo){const undo=document.createElement('button');undo.className='undo undo-button';undo.textContent='Undo';undo.addEventListener('click',undoClose);actions.append(undo);}
+    const dismiss=document.createElement('button');dismiss.className='close-toast';dismiss.textContent='×';dismiss.setAttribute('aria-label','Dismiss notification');actions.append(dismiss);head.append(label,actions);
+    const msg=document.createElement('div');msg.className='toast-msg';msg.textContent=String(message);
+    const time=document.createElement('div');time.className='toast-time';time.textContent=`${new Date().toLocaleTimeString()} · AeroDose`;toast.append(head,msg,time);
+    const stack=$('toastStack');
+    while(stack.children.length>=3){
+      const removable=[...stack.children].reverse().find(node=>!node.querySelector('.undo-button:not(:disabled)'))||stack.lastElementChild;
+      removable.remove();
+    }
+    stack.prepend(toast);
+    let left=6500,started=Date.now(),timer=null;
+    const pause=()=>{if(timer){clearTimeout(timer);timer=null;left=Math.max(0,left-(Date.now()-started));}};
+    const resume=()=>{if(timer||left<=0||toast.matches(':hover')||toast.contains(document.activeElement))return;started=Date.now();timer=setTimeout(()=>toast.remove(),left);};
+    toast.addEventListener('mouseenter',pause);toast.addEventListener('mouseleave',resume);toast.addEventListener('focusin',pause);
+    toast.addEventListener('focusout',event=>{if(!toast.contains(event.relatedTarget))resume();});
+    dismiss.addEventListener('click',()=>{pause();toast.remove();});resume();playSound(severity);logMessage(title,message);
+  }
+  function logMessage(channel,message){
+    state.alertLogs.unshift({ts:Date.now(),channel:String(channel),msg:String(message)});state.alertLogs=state.alertLogs.slice(0,3000);renderLogs();saveState(false);
+  }
+
+  /* Rendering views */
+  function renderValve(){
+    const uiState=getValveUiState();
+    $('commandBanner').classList.toggle('locked',uiState==='CLOSED');
+    $('commandBanner').classList.toggle('unknown',uiState==='UNKNOWN');
+    if(uiState==='OPEN'){
+      text('valveHeading','CYLINDER VALVE STATE: OPEN · ARMED');
+      text('svgValveText','VALVE OPEN · ARMED');
+      $('svgValveText').setAttribute('fill','#34d399');
+    }else if(uiState==='CLOSED'){
+      text('valveHeading','CYLINDER VALVE STATE: CLOSED · SAFE');
+      text('svgValveText','VALVE CLOSED · SAFE');
+      $('svgValveText').setAttribute('fill','#fb7185');
+    }else{
+      text('valveHeading','CYLINDER VALVE STATE: UNKNOWN (OFFLINE / UNACKED)');
+      text('svgValveText','VALVE UNKNOWN');
+      $('svgValveText').setAttribute('fill','#fbbf24');
+    }
+    $('angleSlider').value=String(state.angle);
+  }
+
+  function renderRefills(){
+    const list=$('refillHistory');list.replaceChildren();
+    state.refillHistory.slice(0,5).forEach(item=>{const row=document.createElement('div');row.textContent=`📦 ${item.status} · ${new Date(item.ts).toLocaleString()} · ${item.edition}`;list.append(row);});
+  }
+
+  function renderProfile(){
+    const p=profile(),percent=pct(p),used=Math.max(0,p.sessionUsedGrams),cost=used/1000*p.tariff;
+    text('editionSub',state.edition==='NORMAL'?'Domestic LPG · Smart valve and refill alerts':'Industrial CO₂ / N₂ · Mass-quota dosing');
+    text('cylinderTag',`${(p.capacityGrams/1000).toFixed(1)} kg ${state.edition==='NORMAL'?'LPG':'CO₂ / N₂'}`);
+    text('profileViewLabel',`One valve · viewing ${state.edition==='NORMAL'?'Home':'Pro'} cylinder`);
+    text('svgGasLabel',state.edition==='NORMAL'?'HOME LPG CYLINDER':'INDUSTRIAL CO₂ / N₂');
+    text('gasKpiLabel',state.edition==='NORMAL'?'Remaining LPG':'Remaining CO₂ / N₂');text('sensorProfile',`${sensorName()} · ${state.edition==='NORMAL'?'Home':'Industrial'}`);
+    text('gasSensorLabel',sensorName());text('gasPpm',`${Math.round(p.sensor.gasPpm)} PPM`);
+    $('gasPpm').style.color=p.sensor.gasPpm>=1000?'var(--red)':p.sensor.gasPpm>=800?'var(--amber)':'var(--green)';
+    text('gasPct',percent.toFixed(1));text('remainingMass',`${Math.round(p.currentGrams).toLocaleString()} g`);text('capacityMass',`${p.capacityGrams.toLocaleString()} g`);
+    text('flowValue',fixed(p.flowGPerMin));text('avgFlow',recentAverageFlow(p).toFixed(1));text('sessionCost',fmtMoney(cost));
+    text('tariffValue',fmtMoney(p.tariff));text('motorCurrent',`${p.sensor.motorCurrentA.toFixed(2)} A`);
+    const liquidH=Math.max(6,Math.round(percent/100*166));$('liquidFill').setAttribute('y',String(294-liquidH));$('liquidFill').setAttribute('height',String(liquidH));
+    text('svgPct',`${percent.toFixed(1)}% LEFT`);text('svgGasMass',`${Math.round(p.currentGrams).toLocaleString()} g`);text('svgSession',`Session used: ${Math.round(used).toLocaleString()} g`);
+    $('bodyRed').style.display=state.edition==='NORMAL'?'':'none';$('bodyPro').style.display=state.edition==='PRO'?'':'none';
+    $('normalButton').setAttribute('aria-pressed',String(state.edition==='NORMAL'));$('proButton').setAttribute('aria-pressed',String(state.edition==='PRO'));
+    $('homePanel').classList.toggle('hidden',state.edition!=='NORMAL');$('proPanel').classList.toggle('hidden',state.edition!=='PRO');
+    $('gasSlider').value=String(clamp(percent,1,100));$('tariffInput').value=String(p.tariff);$('quotaInput').value=String(p.quotaGrams);
+    text('quotaProgress',`${Math.round(p.quotaUsed).toLocaleString()} / ${p.quotaGrams.toLocaleString()} g${p.quotaComplete?' · COMPLETE':''}`);
+    text('furnaceReading',`${Math.round(p.sensor.tempC)} °C`);$('furnaceReading').style.color=p.sensor.tempC>=920?'var(--red)':p.sensor.tempC>=880?'var(--amber)':'#fbbf24';
+    $('tempMeter').style.width=`${clamp(p.sensor.tempC/1000*100,0,100)}%`;
+    text('pressureReading',`${p.sensor.pressureBar.toFixed(2)} bar`);$('pressureReading').style.color=p.sensor.pressureBar>=3.8?'var(--red)':p.sensor.pressureBar>=3.2?'var(--amber)':'var(--green)';
+    
+    // Split refill visibility
+    const showRefill=p.alertStage>=1;
+    $('bookRefillButton').classList.toggle('hidden',!showRefill);
+    $('replaceCylinderButton').classList.toggle('hidden',!showRefill);
+    $('proReplaceCylinderButton').classList.toggle('hidden',!showRefill);
+
+    renderRefills();renderInsights();renderValve();
+    const names=['HEALTHY (>20%)','STAGE 1 · BOOK REFILL','STAGE 2 · LOW RESERVE','STAGE 3 · EMPTY LOCK'];
+    const faults=visibleFaults().length;
+    text('alertStatusSub',`Cylinder status: ${names[p.alertStage]||names[0]} · ${faults} active fault${faults===1?'':'s'} · ${canOpenValve().reason}`);
+  }
+
+  function renderDevice(){
+    const offline=state.source==='ESP'&&failedPolls>=3;
+    const noSensor=state.source==='ESP'&&freshEspSample&&(!state.sensorFresh||Date.now()-state.lastSyncAt>2500);
+    const uiState=getValveUiState();
+    $('deviceDot').className=`dot${offline?' offline':uiState==='UNKNOWN'?' unknown':state.source==='ESP'&&freshEspSample?' esp':''}`;
+    const mirrorText=!isLeader?' · Mirror tab (read-mostly)':'';
+    text('deviceState',(state.source==='SIM'?'Simulated':offline?'ESP offline':freshEspSample?'ESP connected':'ESP connecting')+mirrorText);
+    text('lastSync',state.lastSyncAt?new Date(state.lastSyncAt).toLocaleTimeString():'Never');
+    text('signalText',state.source==='SIM'?'●●● (virtual)':offline?'○○○':freshEspSample?'●●●':'○○○');
+    $('staleWarning').classList.toggle('hidden',!offline&&!noSensor);
+    text('staleWarning',noSensor?'⚠ Fresh gas-sensor reading unavailable — re-arm blocked':'⚠ Stale data — live safety checks paused');
+    $('gasSlider').disabled=state.source==='ESP';
+    ['healthyButton','stage1Button','stage2Button','emptyButton','runDemoButton','leakTest','stallTest','proLeakTest','proStallTest','doseButton'].forEach(id=>{
+      if($(id))$(id).disabled=state.source==='ESP';
+    });
+
+    // Prominent Red Banner: Device reports open while locked
+    const deviceReportsOpenWhileLocked=state.source==='ESP'&&state.reportedOpen===true&&(hasBlockingFault(state)||!canOpenValve().allowed||!state.commandedOpen);
+    $('deviceOpenLockedBanner').classList.toggle('active',deviceReportsOpenWhileLocked);
+  }
+
+  function renderFaults(){
+    const f=highestFault();$('faultBanner').classList.toggle('active',!!f);
+    if(!f){$('ackLeakButton').hidden=true;text('ackClock','');}
+    else{
+      const count=visibleFaults().length;
+      text('faultTitle',`🚨 ${{leak:'GAS LEAK',stall:'ACTUATOR STALL',empty:'EMPTY CYLINDER'}[f.type]} · ${count} active fault${count===1?'':'s'}`);
+      text('faultDetail',`${f.reading} · ${f.profile==='NORMAL'?'Home':'Pro'} profile`);text('faultTime',timeOf(f.at));
+      $('ackLeakButton').hidden=!state.faults.some(x=>x.type==='leak');$('ackLeakButton').disabled=!state.leakAckDeadline;
+    }
+    // Red dot on hidden profile button if a fault exists on it
+    const normalFault=state.faults.some(x=>x.profile==='NORMAL');
+    const proFault=state.faults.some(x=>x.profile==='PRO');
+    $('normalDot').classList.toggle('hidden',state.edition==='NORMAL'||!normalFault);
+    $('proDot').classList.toggle('hidden',state.edition==='PRO'||!proFault);
+
+    // Modal fault summary
+    const modalSummary=$('modalFaultSummary');
+    if(modalSummary){
+      if(!state.faults.length){
+        modalSummary.textContent='Active faults: None. Sensors clear.';
+        modalSummary.style.borderColor='var(--green)';modalSummary.style.color='#a7f3d0';
+      }else{
+        modalSummary.textContent='Active faults: '+state.faults.map(x=>`${x.type.toUpperCase()} (${x.reading}, ${x.profile})`).join(' · ');
+        modalSummary.style.borderColor='var(--red)';modalSummary.style.color='#ffe4e6';
+      }
+    }
+  }
+
+  function renderAll(){renderProfile();renderDevice();renderFaults();}
+
+  /* Safety Action Execution */
+  function notifyStage(action){
+    const avg=recentAverageFlow(),eta=duration(action.grams/avg),labels=['Healthy reserve','Stage 1 · Book refill','Stage 2 · Low reserve','Stage 3 · Empty lock'];
+    const msg=action.stage===0?'Gas level is back above refill threshold.':`${Math.round(action.pct)}% ${gasName()} remains (${Math.round(action.grams)} g); about ${eta} at recent average flow.`;
+    showToast(labels[action.stage],msg,action.stage===3?'danger':action.stage?'warning':'success');
+  }
+  function applySafetyActions(actions){
+    let urgent=false;
+    for(const a of actions){
+      if(a.type==='raiseFault'&&!state.faults.some(f=>f.type===a.fault.type&&f.profile===a.fault.profile)){
+        state.faults.push(a.fault);cancelUndo();urgent=true;if(['leak','stall'].includes(a.fault.type))state.rearmRequired=true;
+        if(a.fault.type==='leak')state.leakAckDeadline=Date.now()+5000;
+        showToast(`${a.fault.type.toUpperCase()} FAULT`,`${a.fault.reading} detected on ${a.fault.profile} profile. Valve closed.`,'danger');
+      }else if(a.type==='clearFault'){
+        state.faults=state.faults.filter(f=>f.type!==a.faultType||f.profile!==a.profile);urgent=true;
+      }else if(a.type==='closeValve'){
+        if(state.valveOpen||state.commandedOpen){
+          state.commandedOpen=false;state.valveOpen=false;state.armed=false;
+          if(state.source==='ESP')void sendCommand({cmd:'close',angle:0});
+        }
+      }else if(a.type==='changeAlertStage'){
+        profile().alertStage=a.stage;
+      }else if(a.type==='stageNotification'){
+        notifyStage(a);
+      }
+    }
+    renderFaults();renderValve();if(urgent)saveState(true);
+  }
+  function runSafety(reason){const actions=evaluateSafety(state);applySafetyActions(actions);updateStableReading();if(reason==='slider')renderAll();saveState(false);return actions;}
+
+  function chooseEdition(edition){
+    if(!['NORMAL','PRO'].includes(edition))return;state.edition=edition;profile().alertStage=stageFor(pct(profile()));
+    if(state.source==='SIM'){state.lastDataAt=Date.now();state.sensorFresh=true;runSafety('profile');}
+    else{freshEspSample=false;state.sensorFresh=false;}
+    if(state.valveOpen&&!canOpenValve().allowed){state.valveOpen=false;state.commandedOpen=false;state.armed=false;}
+    renderAll();renderChart();saveState(true);
+  }
+
+  function setGasSlider(value){
+    if(state.source==='ESP')return;
+    const p=profile();p.currentGrams=Math.round(p.capacityGrams*clamp(Number(value)||0,0,100)/100);
+    p.sessionUsedGrams=Math.max(0,p.sessionStartGrams-p.currentGrams);state.lastDataAt=Date.now();
+    runSafety('slider');appendHistory({flow:0,simulated:true});
+  }
+
+  function applyPreset(button){
+    const gate=canOpenValve();if(!gate.allowed){showToast('SAFETY LOCK',gate.reason,'danger');if(state.rearmRequired)openSafetyModal();return;}
+    if(!state.valveOpen){showToast('ARM REQUIRED','Hold to arm before starting a preset.','warning');return;}
+    state.whistleTarget=Number(button.dataset.whistles);state.whistleCount=0;
+    const seconds=Number(button.dataset.timer);state.timerDeadline=seconds?Date.now()+seconds*1000:null;
+    showToast('HOME PRESET',`${button.dataset.label} preset started.`,'info');saveState(false);renderAll();
+  }
+
+  function handleAngle(value){
+    const angle=clamp(Number(value)||0,0,90);
+    if(angle===0){state.angle=0;closeValve('angle slider');return;}
+    const gate=canOpenValve();
+    if(!gate.allowed){state.angle=0;$('angleSlider').value='0';showToast('SAFETY LOCK',gate.reason,'danger');return;}
+    if(!state.armed||!state.valveOpen){state.angle=0;$('angleSlider').value='0';showToast('ARM REQUIRED','Hold to arm before adjusting valve angle.','warning');return;}
+    state.angle=angle;state.lastDataAt=Date.now();
+    if(state.source==='ESP')void sendCommand({cmd:'open',angle});
+    runSafety('angle');renderAll();saveState(true);
+  }
+
+  function armSystem(){
+    const gate=canOpenValve();
+    if(!gate.allowed){showToast('SAFETY LOCK',gate.reason,'danger');if(state.rearmRequired)openSafetyModal();return false;}
+    return openValve('hold to arm');
+  }
+
+  /* Reset session (formerly Tare load cell) */
+  function resetSession(){
+    const p=profile();
+    p.sessionStartGrams=p.currentGrams;
+    p.sessionUsedGrams=0;
+    state.lastDataAt=Date.now();
+    runSafety('reset session');
+    appendHistory({marker:'Reset session',simulated:state.source==='SIM'});
+    renderAll();saveState(false);
+    showToast('SESSION RESET','Session counter reset to zero.','info');
+    logMessage('SESSION','Session counter reset to zero.');
+  }
+
+  function newBatch(){
+    const p=profile();
+    p.sessionStartGrams=p.currentGrams;
+    p.sessionUsedGrams=0;
+    p.quotaUsed=0;
+    p.quotaComplete=false;
+    state.lastDataAt=Date.now();
+    runSafety('batch');
+    appendHistory({marker:'New batch',simulated:state.source==='SIM'});
+    renderAll();saveState(false);
+  }
+
+  function doseBurst(requested=400){
+    const p=profile(),gate=canOpenValve();
+    if(!gate.allowed||!state.valveOpen){showToast('SAFETY LOCK',gate.reason,'danger');return;}
+    if(state.source==='ESP'){
+      showToast('ESP MODE','In ESP mode, dosing is tracked via live load-cell telemetry.','warning');
+      return;
+    }
+    const dose=Math.min(Math.max(0,requested),Math.max(0,p.quotaGrams-p.quotaUsed),p.currentGrams);
+    if(!dose){showToast('BATCH COMPLETE','Start a new batch before dosing again.','warning');return;}
+    p.currentGrams-=dose;p.quotaUsed+=dose;p.sessionUsedGrams=Math.max(0,p.sessionStartGrams-p.currentGrams);
+    addUsage(dose,true);
+    if(p.quotaUsed>=p.quotaGrams){p.quotaComplete=true;closeValve('quota');}
+    state.lastDataAt=Date.now();runSafety('burst');appendHistory({simulated:true});renderAll();saveState(false);
+  }
+
+  /* Split Refill: (a) Book refill only records booking (b) Cylinder replaced */
+  function bookRefill(){
+    state.refillHistory.unshift({ts:Date.now(),edition:state.edition,status:'Booked'});
+    appendHistory({marker:'Refill booked',simulated:state.source==='SIM'});
+    renderRefills();saveState(false);
+    showToast('REFILL BOOKED',`Booking recorded for ${gasName()} cylinder.`,'success');
+  }
+
+  function cylinderReplaced(){
+    const p=profile();
+    if(state.source==='SIM'){
+      p.currentGrams=p.capacityGrams;p.sessionStartGrams=p.capacityGrams;p.sessionUsedGrams=0;p.quotaUsed=0;p.quotaComplete=false;
+      state.refillHistory.unshift({ts:Date.now(),edition:state.edition,status:'Replaced'});
+      state.lastDataAt=Date.now();
+      runSafety('cylinder replaced');
+      appendHistory({marker:'Cylinder replaced',simulated:true});
+      renderAll();saveState(false);
+      showToast('CYLINDER REPLACED','Simulated cylinder replaced to capacity.','success');
+    }else{
+      state.refillHistory.unshift({ts:Date.now(),edition:state.edition,status:'Replaced (awaiting scale)'});
+      appendHistory({marker:'Cylinder replaced',simulated:false});
+      renderRefills();saveState(false);
+      showToast('CYLINDER REPLACED','Replacement logged. Waiting for ESP load-cell telemetry jump.','info');
+    }
+  }
+
+  /* Fault Simulation with decay */
+  function simulateLeak(targetEdition=state.edition){
+    if(state.source==='ESP'){showToast('ESP MODE','Simulation disabled in ESP mode. Live readings govern safety.','warning');return;}
+    const p=state.profiles[targetEdition];
+    p.sensor.gasPpm=1420;
+    state.lastDataAt=Date.now();state.sensorFresh=true;
+    runSafety('leak test');appendHistory({simulated:true});renderAll();
+  }
+
+  function simulateStall(targetEdition=state.edition){
+    if(state.source==='ESP'){showToast('ESP MODE','Simulation disabled in ESP mode. Live readings govern safety.','warning');return;}
+    const p=state.profiles[targetEdition];
+    p.sensor.motorCurrentA=2.24;
+    p.sensor.stallJamUntil=Date.now()+4000; // Simulated jam clears after ~4 seconds
+    state.lastDataAt=Date.now();state.sensorFresh=true;
+    runSafety('stall test');appendHistory({simulated:true});renderAll();
+  }
+
+  /* Safety Modal & Dwell timer with gas AND motor current checks */
+  let returnFocus=null;
+  function openSafetyModal(){
+    if(!state.rearmRequired&&!state.faults.some(f=>['leak','stall'].includes(f.type)))return;
+    returnFocus=document.activeElement;state.checklist={source:false,vent:false,clear:false};
+    $('checkSource').checked=$('checkVent').checked=$('checkClear').checked=false;
+    $('modalBackdrop').classList.add('open');$('pageMain').inert=true;$('toastStack').inert=true;
+    saveState(true);updateRearmReadiness();setTimeout(()=>$('checkSource').focus(),0);
+  }
+  function closeSafetyModal(){
+    $('modalBackdrop').classList.remove('open');$('pageMain').inert=false;$('toastStack').inert=false;
+    if(hold)endHold();
+    if(returnFocus&&document.contains(returnFocus))returnFocus.focus();
+  }
+
+  function canClearFaults(){
+    const p=profile();
+    const gasSafe=p.sensor.gasPpm<300;
+    const currentSafe=p.sensor.motorCurrentA<2.1;
+    const espFresh=state.source!=='ESP'||hasFreshEspData();
+    return gasSafe&&currentSafe&&espFresh;
+  }
+
+  function updateStableReading(){
+    const p=profile();
+    const gasSafe=p.sensor.gasPpm<300;
+    const currentSafe=p.sensor.motorCurrentA<2.1;
+    const espFresh=state.source!=='ESP'||hasFreshEspData();
+    const safe=gasSafe&&currentSafe&&espFresh;
+    const now=Date.now();
+    if(safe){
+      if(!state.rearmStableSince)state.rearmStableSince=now;
+    }else{
+      state.rearmStableSince=null;
+    }
+    updateRearmReadiness();
+  }
+
+  function updateRearmReadiness(){
+    const p=profile();
+    const gasSafe=p.sensor.gasPpm<300;
+    const currentSafe=p.sensor.motorCurrentA<2.1;
+    const espFresh=state.source!=='ESP'||hasFreshEspData();
+    const elapsed=state.rearmStableSince?Math.max(0,Date.now()-state.rearmStableSince):0;
+    const percent=clamp(elapsed/10000*100,0,100);
+    $('rearmProgress').style.width=`${percent}%`;
+
+    let reasonText='';
+    if(!espFresh){
+      reasonText='Waiting for fresh live ESP data…';
+    }else if(!gasSafe&&!currentSafe){
+      reasonText=`Gas (${Math.round(p.sensor.gasPpm)} PPM ≥ 300) and current (${p.sensor.motorCurrentA.toFixed(2)} A ≥ 2.1 A) unsafe`;
+    }else if(!gasSafe){
+      reasonText=`Gas high (${Math.round(p.sensor.gasPpm)} PPM ≥ 300 PPM limit)`;
+    }else if(!currentSafe){
+      reasonText=`Motor current high (${p.sensor.motorCurrentA.toFixed(2)} A ≥ 2.1 A limit)`;
+    }else if(percent<100){
+      reasonText=`Readings safe for ${Math.floor(elapsed/1000)} / 10 continuous seconds`;
+    }else{
+      reasonText='Live readings safe for 10 seconds. Ready to acknowledge & arm.';
+    }
+    text('rearmProgressText',reasonText);
+    const checked=$('checkSource').checked&&$('checkVent').checked&&$('checkClear').checked;
+    $('confirmRearm').disabled=!(checked&&percent>=100&&canClearFaults());
+    renderFaults();
+  }
+
+  function acknowledgeLeak(){
+    const leak=state.faults.find(f=>f.type==='leak');if(!leak)return;
+    state.faults=state.faults.filter(f=>!(f.type==='leak'&&f.profile===leak.profile&&f.at===leak.at));
+    state.leakAckDeadline=null;state.rearmRequired=true;state.valveOpen=false;state.commandedOpen=false;state.armed=false;
+    if(state.source==='SIM'){
+      state.profiles[leak.profile].sensor.gasPpm=leak.profile==='NORMAL'?180:240;
+    }
+    state.lastDataAt=Date.now();state.rearmStableSince=null;
+    runSafety('leak acknowledgement');renderFaults();saveState(true);
+    showToast('FAULT ACKNOWLEDGED','False alarm acknowledged. Valve closed until checklist and 10s dwell complete.','warning');
+  }
+
+  function finishRearm(){
+    updateRearmReadiness();if($('confirmRearm').disabled||!state.rearmRequired||!canClearFaults())return false;
+    state.faults=state.faults.filter(f=>!(['leak','stall'].includes(f.type)&&f.profile===state.edition));
+    state.rearmRequired=state.faults.some(f=>['leak','stall'].includes(f.type));state.leakAckDeadline=null;
+    state.checklist={source:true,vent:true,clear:true};
+    const gate=canOpenValve();if(!gate.allowed){renderFaults();saveState(true);showToast('SAFETY LOCK',gate.reason,'danger');return false;}
+    closeSafetyModal();saveState(true);return openValve('safety checklist');
+  }
+
+  function undoClose(){
+    const old=state.undo;if(!old||Date.now()>old.deadline)return;const gate=canOpenValve();state.undo=null;
+    if(old.valveOpen&&old.armed&&gate.allowed){
+      state.armed=true;state.angle=old.angle;openValve('undo');
+    }else{
+      state.valveOpen=false;state.commandedOpen=false;state.armed=false;renderValve();
+      showToast('UNDO BLOCKED',gate.allowed?'The previous state was closed.':gate.reason,'warning');saveState(true);
+    }
+  }
+
+  /* Hold Ring with requestAnimationFrame */
+  function holdRafLoop(){
+    if(!hold)return;
+    drawHold(Date.now());
+    if(hold)rafHoldId=requestAnimationFrame(holdRafLoop);
+  }
+  function startHold(kind,button,progressId,event){
+    if(hold)return;
+    if(kind==='rearm'){updateRearmReadiness();if($('confirmRearm').disabled)return;}
+    if(kind==='arm'){const gate=canOpenValve();if(!gate.allowed){showToast('SAFETY LOCK',gate.reason,'danger');if(state.rearmRequired)openSafetyModal();return;}}
+    hold={kind,button,progressId,start:Date.now(),deadline:Date.now()+1000};
+    if(event&&event.pointerId!==undefined)try{button.setPointerCapture(event.pointerId);}catch(e){}
+    cancelAnimationFrame(rafHoldId);
+    rafHoldId=requestAnimationFrame(holdRafLoop);
+  }
+  function drawHold(now){
+    if(!hold)return;
+    const value=clamp((now-hold.start)/1000,0,1);
+    $(hold.progressId).style.strokeDashoffset=String(63*(1-value));
+    if(now>=hold.deadline){const kind=hold.kind;endHold(true);if(kind==='arm')armSystem();else finishRearm();}
+  }
+  function endHold(done=false){
+    cancelAnimationFrame(rafHoldId);
+    if(!hold)return;
+    const old=hold;hold=null;
+    if(!done)$(old.progressId).style.strokeDashoffset='63';
+  }
+  function bindHold(button,kind,progressId){
+    button.addEventListener('pointerdown',event=>{event.preventDefault();startHold(kind,button,progressId,event);});
+    ['pointerup','pointercancel','lostpointercapture'].forEach(type=>button.addEventListener(type,()=>endHold()));
+    button.addEventListener('keydown',event=>{if([' ','Enter'].includes(event.key)&&!event.repeat){event.preventDefault();startHold(kind,button,progressId,event);}});
+    button.addEventListener('keyup',event=>{if([' ','Enter'].includes(event.key))endHold();});
+    button.addEventListener('contextmenu',event=>event.preventDefault());
+  }
+
+  function closeNow(){
+    closeValve('kill',true);
+  }
+
+  /* Telemetry handling */
+  function recordReadingsFromEsp(data){
+    const p=profile(),read=(key,fallback,low,high)=>Number.isFinite(Number(data[key]))?clamp(Number(data[key]),low,high):fallback;
+    const before=p.currentGrams;
+    p.currentGrams=read('currentGasGrams',p.currentGrams,0,p.capacityGrams);
+    p.flowGPerMin=read('flowRateGPerMin',p.flowGPerMin,0,100000);
+    const sensor=data.gasPpm??data.lpgPpm??data.ndirCo2Ppm;
+    state.sensorFresh=sensor!==null&&sensor!==undefined&&sensor!==''&&Number.isFinite(Number(sensor));
+    if(state.sensorFresh)p.sensor.gasPpm=clamp(Number(sensor),0,100000);
+    p.sensor.motorCurrentA=read('motorCurrentA',p.sensor.motorCurrentA,0,1000);
+    p.sensor.tempC=read('furnaceTempC',p.sensor.tempC,-100,3000);p.sensor.pressureBar=read('manifoldBar',p.sensor.pressureBar,0,1000);
+    state.reportedOpen=data.valveOpen===true;
+    const delta=Math.max(0,before-p.currentGrams);
+    if(delta){
+      addUsage(delta,false);
+      p.sessionUsedGrams=Math.max(0,p.sessionStartGrams-p.currentGrams);
+      if(state.edition==='PRO'){
+        p.quotaUsed=Math.min(p.quotaGrams,p.quotaUsed+delta);
+        if(p.quotaUsed>=p.quotaGrams&&!p.quotaComplete){
+          p.quotaComplete=true;
+          showToast('BATCH COMPLETE','Batch quota reached. Valve closed.','success');
+          closeValve('quota');
+        }
+      }
+    }
+    return{deviceOpen:state.reportedOpen,sensorFresh:state.sensorFresh};
+  }
+
+  async function pollEsp(){
+    if(pollInFlight)return;const host=$('espIp').value.trim();
+    if(!validHost(host)){failedPolls=Math.min(3,failedPolls+1);freshEspSample=false;state.sensorFresh=false;state.reportedOpen=null;state.rearmStableSince=null;addGap();renderDevice();renderValve();return;}
+    pollInFlight=true;let timer;
+    try{
+      const controller=new AbortController();timer=setTimeout(()=>controller.abort(),2500);
+      const response=await fetch(`http://${host}/api/telemetry`,{signal:controller.signal,cache:'no-store'});
+      if(!response.ok)throw new Error(`HTTP ${response.status}`);
+      const data=await response.json();if(!data||typeof data!=='object')throw new Error('Telemetry response must be an object.');
+      failedPolls=0;freshEspSample=true;state.lastSyncAt=Date.now();state.lastDataAt=state.lastSyncAt;
+      const today=ensureToday(profile());if(today.seeded){today.grams=0;today.seeded=false;}today.simulated=false;
+      const {deviceOpen}=recordReadingsFromEsp(data);
+      runSafety('esp');
+      if(deviceOpen){
+        const gate=canOpenValve();
+        state.valveOpen=gate.allowed&&state.armed&&state.commandedOpen;
+      }else{
+        state.valveOpen=false;
+      }
+      appendHistory({simulated:false,sensorFresh:state.sensorFresh});
+      renderAll();
+    }catch(error){
+      failedPolls++;freshEspSample=false;state.sensorFresh=false;
+      if(failedPolls>=3)state.reportedOpen=null;
+      state.rearmStableSince=null;addGap();renderDevice();renderValve();
+    }finally{clearTimeout(timer);pollInFlight=false;}
+  }
+
+  function driftSensors(p){
+    // Stall decay: in SIM, jam clears after ~4s (current decays to ~0.08 A)
+    if(p.sensor.stallJamUntil){
+      if(Date.now()>=p.sensor.stallJamUntil){
+        p.sensor.motorCurrentA=Math.max(0.08,p.sensor.motorCurrentA-0.6);
+        if(p.sensor.motorCurrentA<=0.09){p.sensor.motorCurrentA=0.08;p.sensor.stallJamUntil=null;}
+      }
+    }else if(p.sensor.motorCurrentA>0.15){
+      p.sensor.motorCurrentA=Math.max(0.08,p.sensor.motorCurrentA-0.4);
+    }
+    if(state.faults.some(f=>f.type==='leak'&&f.profile===state.edition))p.sensor.gasPpm=Math.max(state.edition==='NORMAL'?180:240,p.sensor.gasPpm-140);
+    else if(state.edition==='NORMAL')p.sensor.gasPpm=clamp(p.sensor.gasPpm+(Math.random()-.5)*12,150,280);
+    else p.sensor.gasPpm=clamp(p.sensor.gasPpm+(Math.random()-.5)*10,220,285);
+    if(state.edition==='PRO'){
+      p.sensor.tempC=clamp(p.sensor.tempC+(Math.random()-.49)*3.8,780,970);
+      p.sensor.pressureBar=clamp(p.sensor.pressureBar+(Math.random()-.5)*.035,1.7,4.2);
+    }
+  }
+
+  /* Simulator sample with elapsed time dt */
+  function simulatorSample(now){
+    const dt=clamp((now-lastSampleAt)/1000,0,300);
+    lastSampleAt=now;
+    if(dt<=0)return;
+
+    const p=profile(),before=p.currentGrams;
+    if(state.valveOpen&&state.armed){
+      const flow=state.edition==='NORMAL'?18:45;
+      p.flowGPerMin=Math.max(0,state.angle/90*flow+(Math.random()-.5)*.8);
+      let amount=(p.flowGPerMin/60)*dt;
+      if(state.edition==='PRO')amount=Math.min(amount,Math.max(0,p.quotaGrams-p.quotaUsed));
+      amount=Math.min(amount,p.currentGrams);
+      p.currentGrams-=amount;
+      const consumed=before-p.currentGrams;
+      if(consumed>0)addUsage(consumed,true);
+      p.sessionUsedGrams=Math.max(0,p.sessionStartGrams-p.currentGrams);
+      if(state.edition==='PRO'){
+        p.quotaUsed+=consumed;
+        if(p.quotaUsed>=p.quotaGrams&&!p.quotaComplete){
+          p.quotaComplete=true;closeValve('quota');
+        }
+      }
+    }else{
+      p.flowGPerMin=0;
+    }
+    driftSensors(p);state.lastDataAt=now;state.reportedOpen=state.valveOpen;
+    if(state.timerDeadline&&now>=state.timerDeadline){
+      state.timerDeadline=null;closeValve('simmer timer');showToast('TIMER COMPLETE','Simmer timer finished; valve closed.','success');
+    }
+    runSafety('simulator');appendHistory({simulated:true});renderAll();
+  }
+
+  /* Low-frequency hidden profile evaluation in SIM (1 per 5s) */
+  function evaluateHiddenProfile(now){
+    if(state.source!=='SIM'||now-lastHiddenEvalAt<5000)return;
+    lastHiddenEvalAt=now;
+    const hiddenEdition=state.edition==='NORMAL'?'PRO':'NORMAL';
+    const hp=state.profiles[hiddenEdition];
+    driftSensors(hp);
+    const hiddenActions=[];
+    const types=new Set(state.faults.filter(f=>f.profile===hiddenEdition).map(f=>f.type));
+    if(hp.sensor.gasPpm>=1000&&!types.has('leak')){
+      hiddenActions.push({type:'raiseFault',fault:{type:'leak',profile:hiddenEdition,reading:`${hp.sensor.gasPpm.toFixed(0)} PPM`,at:now}});
+    }
+    if(hp.sensor.motorCurrentA>2.1&&!types.has('stall')){
+      hiddenActions.push({type:'raiseFault',fault:{type:'stall',profile:hiddenEdition,reading:`${hp.sensor.motorCurrentA.toFixed(2)} A`,at:now}});
+    }
+    if(hiddenActions.length)applySafetyActions(hiddenActions);
+  }
+
+  function tickDeadlines(now){
+    if(state.undo&&now>=state.undo.deadline){
+      state.undo=null;document.querySelectorAll('.undo-button').forEach(button=>button.disabled=true);saveState(false);
+    }
+    if(state.leakAckDeadline){
+      if(now>=state.leakAckDeadline){state.leakAckDeadline=null;$('ackLeakButton').disabled=true;text('ackClock','Acknowledgement window ended');saveState(false);}
+      else text('ackClock',`Acknowledge window: ${Math.ceil((state.leakAckDeadline-now)/1000)} s`);
+    }
+    // Only update simmerInput when NOT focused and at most once per second
+    if(state.timerDeadline){
+      const left=Math.max(0,Math.ceil((state.timerDeadline-now)/1000));
+      if(document.activeElement!==$('simmerInput')&&now-lastSimmerInputUpdate>=1000){
+        $('simmerInput').value=String(left);
+        lastSimmerInputUpdate=now;
+      }
+      if(!left){
+        state.timerDeadline=null;
+        if(document.activeElement!==$('simmerInput'))$('simmerInput').value='0';
+        closeValve('simmer timer');showToast('TIMER COMPLETE','Simmer timer finished; valve closed.','success');
+      }
+    }
+    updateStableReading();
+  }
+
+  function tick(){
+    const now=Date.now();
+    tickDeadlines(now);
+
+    // Locked open banner retry in ESP mode
+    const deviceReportsOpenWhileLocked=state.source==='ESP'&&state.reportedOpen===true&&(hasBlockingFault(state)||!canOpenValve().allowed||!state.commandedOpen);
+    if(deviceReportsOpenWhileLocked&&now-lastLockedRetryAt>=2000){
+      lastLockedRetryAt=now;
+      void sendCommand({cmd:'close',angle:0});
+    }
+
+    if(isLeader){
+      if(now>=sampleDueAt){
+        sampleDueAt=now+1000;
+        if(state.source==='ESP')void pollEsp();
+        else simulatorSample(now);
+        evaluateHiddenProfile(now);
+        renderDevice();
+        saveState(false);
+        // Telemetry sync to follower tabs
+        if(bus&&!demoSnapshot){
+          try{bus.postMessage({type:'telemetry_sync',state:clone(state),fromTab:tabId});}catch(e){}
+        }
+      }
+    }else{
+      // Follower tab keeps device status rendered
+      renderDevice();
+    }
+  }
+
+  /* CSV Export with injection protection */
+  function csvCell(value){
+    let s=value===null||value===undefined?'':String(value);
+    if(/^[=+\-@\t\r]/.test(s))s="'"+s;
+    return`"${s.replaceAll('"','""')}"`;
+  }
+  function exportCSV(){
+    const rows=[['record_type','timestamp_iso','edition','capacity_g','gas_remaining_g','gas_percent','flow_g_min','gas_sensor_ppm','motor_current_a','furnace_temp_c','manifold_bar','valve_open','simulated','seeded','marker','alert_channel','message']];
+    for(const edition of ['NORMAL','PRO']){
+      const p=state.profiles[edition];
+      [...p.archive,...p.history].sort((a,b)=>a.ts-b.ts).forEach(point=>{
+        if(point.seeded)return;
+        rows.push(['history',new Date(point.ts).toISOString(),edition,p.capacityGrams,point.gap?'':point.gasGrams,
+          point.gap?'':(point.gasGrams/p.capacityGrams*100).toFixed(2),point.gap?'':point.flowGPerMin,point.gap?'':point.gasPpm,
+          point.gap?'':point.motorCurrentA,point.gap?'':point.tempC,point.gap?'':point.pressureBar,point.gap?'':point.valveOpen,
+          point.simulated,point.seeded,point.marker||'', '',point.gap?'Offline data gap':'']);
+      });
+    }
+    state.alertLogs.slice().reverse().forEach(log=>rows.push(['alert',new Date(log.ts).toISOString(),state.edition,'','','','','','','','','','','','',log.channel,log.msg]));
+    const blob=new Blob([rows.map(row=>row.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`AeroDose_${state.edition}_History.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
+  /* Demo mode */
+  function runDemo(){
+    if(state.source==='ESP'||demoSnapshot)return;
+    const initialGate=canOpenValve();if(!initialGate.allowed){showToast('DEMO BLOCKED',initialGate.reason,'warning');return;}
+    saveState(true);demoSnapshot=clone(state);$('dataSource').disabled=true;$('runDemoButton').disabled=true;$('stopDemoButton').classList.remove('hidden');
+    const steps=[
+      ['Home preset cooking',()=>{chooseEdition('NORMAL');if(!state.valveOpen)openValve('demo preset');applyPreset({dataset:{whistles:'3',timer:'0',label:'Rice / Dal'}});}],
+      ['Stage 1 refill warning',()=>setGasSlider(19)],
+      ['Stage 2 low reserve',()=>setGasSlider(9)],
+      ['Leak · valve closes immediately',()=>{profile().sensor.gasPpm=1420;state.lastDataAt=Date.now();runSafety('demo leak');}],
+      ['Checklist, live-clear period, recovery',()=>{
+        const p=profile();p.currentGrams=p.capacityGrams*.88;p.sensor.gasPpm=180;p.sensor.motorCurrentA=0.08;
+        state.lastDataAt=Date.now();state.rearmStableSince=Date.now()-11000;state.checklist={source:true,vent:true,clear:true};
+        $('checkSource').checked=$('checkVent').checked=$('checkClear').checked=true;runSafety('demo recovery');
+        updateRearmReadiness();finishRearm();
+      }]
+    ];
+    let i=0;const next=()=>{if(!demoSnapshot)return;if(i>=steps.length){$('demoCaption').textContent='Demo complete. Press Stop to restore previous state.';return;}
+      const [caption,action]=steps[i++];$('demoCaption').textContent=`Demo ${i}/${steps.length}: ${caption}`;action();demoTimers.push(setTimeout(next,1600));};
+    $('demoCaption').classList.add('active');next();
+  }
+  function stopDemo(){
+    if(!demoSnapshot)return;demoTimers.forEach(clearTimeout);demoTimers=[];state=demoSnapshot;demoSnapshot=null;
+    document.querySelectorAll('#toastStack .toast').forEach(x=>x.remove());hold=null;
+    $('armProgress').style.strokeDashoffset='63';$('rearmHoldProgress').style.strokeDashoffset='63';
+    $('dataSource').disabled=false;$('demoCaption').textContent='';$('demoCaption').classList.remove('active');$('stopDemoButton').classList.add('hidden');
+    renderAll();renderChart();saveState(true);
+  }
+
+  function onModalKey(event){
+    if(!$('modalBackdrop').classList.contains('open'))return;
+    if(event.key==='Escape'){event.preventDefault();closeSafetyModal();return;}
+    if(event.key!=='Tab')return;
+    const nodes=[...$('safetyModal').querySelectorAll('button:not(:disabled),input:not(:disabled)')];
+    if(!nodes.length)return;const first=nodes[0],last=nodes[nodes.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+  }
+  function onStorage(event){if(event.key!==KEY||!event.newValue)return;try{mergeRemote(JSON.parse(event.newValue));}catch(e){}}
+  function onSourceChange(){
+    state.source=$('dataSource').value==='ESP'?'ESP':'SIM';state.sensorFresh=state.source==='SIM';failedPolls=0;freshEspSample=false;state.rearmStableSince=null;
+    if(state.source==='ESP'&&!validHost($('espIp').value.trim()))showToast('INVALID ESP HOST','Enter a valid IPv4 address or hostname.','warning');
+    renderDevice();renderValve();saveState(true);
+  }
+  function onCheckChange(){
+    state.checklist={source:$('checkSource').checked,vent:$('checkVent').checked,clear:$('checkClear').checked};updateRearmReadiness();
+    saveState(true);
+  }
+  function onMute(){
+    state.muted=!state.muted;$('muteButton').setAttribute('aria-pressed',String(state.muted));
+    $('muteButton').textContent=state.muted?'🔇 Sound muted':'🔊 Sound on';saveState(true);
+  }
+
+  function boot(){
+    hydrate();seedDaily(state.profiles.NORMAL);seedDaily(state.profiles.PRO);
+    for(const p of Object.values(state.profiles))if(!p.history.length){
+      for(let i=59;i>=0;i--)p.history.push({ts:Date.now()-i*1000,gasGrams:p.currentGrams,flowGPerMin:p.flowGPerMin,
+        gasPpm:roundInt(p.sensor.gasPpm),motorCurrentA:round2(p.sensor.motorCurrentA),tempC:round1(p.sensor.tempC),pressureBar:round2(p.sensor.pressureBar),
+        valveOpen:state.valveOpen,stepMs:1000,marker:'',simulated:true,seeded:true,gap:false});
+    }
+    if(!state.alertLogs.length)state.alertLogs.push({ts:Date.now(),channel:'SYSTEM',msg:'AeroDose dashboard initialized.'});
+    $('dataSource').value=state.source;$('espIp').value=state.espIp;$('muteButton').setAttribute('aria-pressed',String(state.muted));
+    $('muteButton').textContent=state.muted?'🔇 Sound muted':'🔊 Sound on';
+    initChart();initLeaderElection();
+
+    $('normalButton').addEventListener('click',()=>chooseEdition('NORMAL'));$('proButton').addEventListener('click',()=>chooseEdition('PRO'));
+    $('gasSlider').addEventListener('input',event=>setGasSlider(event.target.value));
+    $('healthyButton').addEventListener('click',()=>setGasSlider(88));$('stage1Button').addEventListener('click',()=>setGasSlider(19));
+    $('stage2Button').addEventListener('click',()=>setGasSlider(9));$('emptyButton').addEventListener('click',()=>setGasSlider(1));
+    document.querySelectorAll('.preset').forEach(button=>button.addEventListener('click',()=>applyPreset(button)));
+    $('whistleButton').addEventListener('click',()=>{
+      if(!state.valveOpen)return;state.whistleCount++;text('whistleReadout',`${state.whistleCount} / ${state.whistleTarget}`);
+      if(state.whistleTarget&&state.whistleCount>=state.whistleTarget){closeValve('whistle target');showToast('COOKING COMPLETE','Whistle target reached; valve closed.','success');}
+    });
+    $('simmerInput').addEventListener('change',event=>{const seconds=clamp(Number(event.target.value)||0,0,3600);state.timerDeadline=seconds?Date.now()+seconds*1000:null;saveState(false);});
+    $('angleSlider').addEventListener('input',event=>handleAngle(event.target.value));
+    $('tareButton').addEventListener('click',resetSession);
+    bindHold($('armButton'),'arm','armProgress');$('killButton').addEventListener('click',closeNow);
+    bindHold($('confirmRearm'),'rearm','rearmHoldProgress');
+    ['checkSource','checkVent','checkClear'].forEach(id=>$(id).addEventListener('change',onCheckChange));
+    $('cancelModal').addEventListener('click',closeSafetyModal);$('modalBackdrop').addEventListener('click',event=>{if(event.target===$('modalBackdrop'))closeSafetyModal();});
+    document.addEventListener('keydown',onModalKey);$('ackLeakButton').addEventListener('click',acknowledgeLeak);
+    $('dataSource').addEventListener('change',onSourceChange);
+    $('espIp').addEventListener('change',()=>{const host=$('espIp').value.trim();if(validHost(host)){state.espIp=host;saveState(false);}else showToast('INVALID ESP HOST','Use an IPv4 address or hostname, optionally with a port.','warning');});
+    $('tariffInput').addEventListener('change',event=>{profile().tariff=clamp(Number(event.target.value)||0,0,10000);renderProfile();saveState(false);});
+    $('muteButton').addEventListener('click',onMute);$('alertsButton').addEventListener('click',()=>$('logDrawer').classList.toggle('open'));
+    $('alertsToggle').addEventListener('click',()=>$('logDrawer').classList.toggle('open'));
+    $('clearLogs').addEventListener('click',()=>{state.alertLogs=[];renderLogs();saveState(false);});
+    
+    $('bookRefillButton').addEventListener('click',bookRefill);
+    $('replaceCylinderButton').addEventListener('click',cylinderReplaced);
+    $('proReplaceCylinderButton').addEventListener('click',cylinderReplaced);
+    $('doseButton').addEventListener('click',()=>doseBurst(400));
+    $('newBatchButton').addEventListener('click',newBatch);$('csvButton').addEventListener('click',exportCSV);
+    $('leakTest').addEventListener('click',()=>simulateLeak('NORMAL'));$('proLeakTest').addEventListener('click',()=>simulateLeak('PRO'));
+    $('stallTest').addEventListener('click',()=>simulateStall('NORMAL'));$('proStallTest').addEventListener('click',()=>simulateStall('PRO'));
+    $('forceRetryCloseButton').addEventListener('click',()=>{void sendCommand({cmd:'close',angle:0});});
+
+    document.querySelectorAll('[data-range]').forEach(button=>button.addEventListener('click',()=>{
+      state.chartRange=button.dataset.range==='session'?'session':Number(button.dataset.range);
+      document.querySelectorAll('[data-range]').forEach(other=>other.setAttribute('aria-pressed',String(other===button)));
+      renderChart();saveState(false);
+    }));
+    $('quotaInput').addEventListener('change',event=>{
+      const p=profile();p.quotaGrams=clamp(Number(event.target.value)||3000,100,p.capacityGrams);
+      p.quotaUsed=Math.min(p.quotaUsed,p.quotaGrams);p.quotaComplete=p.quotaUsed>=p.quotaGrams;renderProfile();saveState(false);
+    });
+    $('runDemoButton').addEventListener('click',runDemo);$('stopDemoButton').addEventListener('click',stopDemo);
+    window.addEventListener('storage',onStorage);
+    if(bus)bus.addEventListener('message',event=>{
+      if(event.data?.type==='state')mergeRemote(event.data.state,event.data.fromLeader);
+      else if(event.data?.type==='telemetry_sync'&&!isLeader)mergeRemote(event.data.state,true);
+      else if(event.data?.type==='heartbeat'){lastLeaderHeartbeat=event.data.ts||Date.now();}
+      else if(event.data?.type==='valve_command'){
+        if(event.data.cmd==='close'){
+          state.commandedOpen=false;state.valveOpen=false;
+          if(event.data.reason==='kill')state.armed=false;
+          if(state.source==='ESP'&&isLeader)void sendCommand({cmd:'close',angle:0});
+          renderValve();saveState(true);
+        }
+      }
+    });
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='hidden'&&!demoSnapshot)saveState(true);
+      if(document.visibilityState==='visible')lastSampleAt=Date.now();
+    });
+    window.addEventListener('pagehide',()=>{if(!demoSnapshot)saveState(true);});
+    window.addEventListener('beforeunload',()=>{if(leaderRelease)leaderRelease();});
+
+    $('normalButton').setAttribute('aria-pressed',String(state.edition==='NORMAL'));$('proButton').setAttribute('aria-pressed',String(state.edition==='PRO'));
+    if(state.source==='SIM'){state.lastDataAt=Date.now();applySafetyActions(evaluateSafety(state));}
+    if(state.valveOpen){const gate=canOpenValve();if(!gate.allowed||!state.armed){state.valveOpen=false;state.commandedOpen=false;state.armed=false;}}
+    renderAll();renderLogs();
+    document.querySelectorAll('[data-range]').forEach(button=>button.setAttribute('aria-pressed',String(String(button.dataset.range)===String(state.chartRange))));
+    renderChart();saveState(true);setInterval(tick,100);
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

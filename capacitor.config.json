@@ -1,0 +1,12 @@
+{
+  "appId": "com.aerodose.monitor",
+  "appName": "AeroDose",
+  "webDir": "www",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

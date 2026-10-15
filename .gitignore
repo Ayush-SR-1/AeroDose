@@ -1,0 +1,22 @@
+# Node dependencies
+node_modules/
+
+# Android build outputs & caches
+*.apk
+*.aab
+build/
+.gradle/
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+android/local.properties
+
+# IDE & Editor caches
+.idea/
+*.iml
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
