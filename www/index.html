@@ -111,7 +111,6 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog label{display:flex;gap:10px;pa
 <div class="btns"><button class="btn" id="dose">Dose +400 g</button><button class="btn" id="nb">New batch</button></div>
 </div>
 
-<div id="cook" class="card" style="margin-top:16px"><h2>One-Tap Cooking Presets</h2><div class="pre"><button class="btn" data-w="3" data-t="0">3 whistles<br><span class="mut">Rice / dal</span></button><button class="btn" data-w="5" data-t="0">5 whistles<br><span class="mut">Pressure cook</span></button><button class="btn" data-w="0" data-t="12">Milk boil<br><span class="mut">12 s demo timer</span></button></div><div class="btns" style="margin-top:12px;align-items:center"><b id="wh">0 / 3 whistles</b><button class="btn" id="wb">+1 whistle</button><b id="tm"></b></div></div>
 <div class="row" style="margin-top:16px">
 <div class="card"><h2>Daily Gas Consumption</h2><p class="mut">Comparison of daily usage (kg). Demo data until a device syncs.</p>
 <div class="leg"><span><i style="background:#1D5FE0"></i>Previous Week</span><span><i style="background:#0FA896"></i>This Week</span></div>
@@ -220,7 +219,7 @@ function render(){const q=p(),l=lvl(),used=q.t0-q.cur;
  cp('wp',(ta-la)/la*100,ta,la,'(avg. per day)');cp('tp',(tv-yv)/yv*100,tv,yv,'(so far today)');
  const ct=q.cb+used;set('cl',q.last.toFixed(1));set('ct',ct.toFixed(1));set('cp',pf((ct-q.last)/q.last*100)+(ct<q.last?' lower usage':' higher usage')+' than last cycle');
  const dl=ta>0?q.cur/ta:0;set('rd',new Date(Date.now()+dl*864e5).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}));$('#rb').style.width=Math.min(100,used/q.cap*100)+'%';
- $('#proc').hidden=S.ed!=='R';$('#cook').hidden=S.ed!=='H';set('wh',`${S.wh} / ${S.wt} whistles`);set('tm',S.tm?S.tm+' s left':'');
+ $('#proc').hidden=S.ed!=='R';
  $('#tl').setAttribute('y',18+88*(1-l/100));$('#tl').setAttribute('height',88*l/100);$('#tv').style.fill=S.open?'#0FA896':'#D92D20';set('fl',(S.fl||0).toFixed(1));$('#sp').setAttribute('points',S.hist.map((v,i)=>(i*2)+','+(38-Math.min(36,v/(q.base*1.2)*36))).join(' '));set('bn',S.log.length);
  {const off=S.src==='ESP'&&S.fails>2;set('dm',S.src==='SIM'?'Live simulation':off?'ESP32 offline':S.sync?'ESP32 connected':'ESP32 connecting');$('#dd').className='dot'+(off?' off':'');['gl','lk','sj','spd'].forEach(i=>$('#'+i).disabled=S.src==='ESP')}
  if(S.ed==='R'){set('ft',Math.round(S.temp));set('qt',`${Math.round(S.qU)} / ${S.quota} g${S.qD?' · COMPLETE':''}`);$('#qb').style.width=Math.min(100,S.qU/S.quota*100)+'%'}
@@ -262,8 +261,6 @@ async function pollEsp(){if(pb)return;const h=$('#ip').value.trim();if(!hostOk(h
 $('#src').onchange=e=>{S.src=e.target.value;S.fails=0;S.sync=0;if(S.src==='ESP')S.open=false;render()};
 $('#bell').onclick=()=>$$('.nav')[1].click();
 $('#tare').onclick=()=>{p().t0=p().cur;toast('Scale tared','Consumed counter reset to 0.00 kg.','info');render()};
-$$('.pre .btn').forEach(b=>b.onclick=()=>{const g=gate();if(g){toast('Safety lock',g,'danger');return}if(!S.open){toast('Open the valve first','Hold to open the valve before starting a preset.','warn');return}S.wt=+b.dataset.w;S.wh=0;S.tm=+b.dataset.t;toast('Preset started',b.firstChild.textContent+' preset running.','info');render()});
-$('#wb').onclick=()=>{if(!S.open||!S.wt)return;S.wh++;if(S.wh>=S.wt){S.open=false;cmd(false);toast('Cooking complete',S.wh+' whistles done. Valve closed.','ok')}render()};
 const cc=v=>{let x=String(v??'');if(/^[=+\-@\t\r]/.test(x))x="'"+x;return'"'+x.replace(/"/g,'""')+'"'};
 $('#csv').onclick=async()=>{const q=p(),D=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],R=[['type','time_or_day','item','value']];
  D.forEach((d,i)=>R.push(['usage',d,'previous_week_kg',q.prev[i].toFixed(2)],['usage',d,'this_week_kg',i<=di?q.wk[i].toFixed(2):'']));
